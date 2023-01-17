@@ -1,4 +1,4 @@
-import 'package:final_bmi/model/test_model.dart';
+import 'package:final_bmi/model/bmi_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -19,45 +19,47 @@ class DBProvider {
 
   initDB() async {
     io.Directory documentDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentDirectory.path, 'Todos.db');
+    String path = join(documentDirectory.path, 'bmi.db');
     var db = await openDatabase(path, version: 1, onCreate: _createDatabase);
     return db;
   }
 
   _createDatabase(Database database, int version) async {
     await database.execute(
-        "CREATE TABLE mytodos(id INTEGER PRIMARY KEY AUTOINCREMENT, "
-            "title TEXT NOT NULL, completed INTEGER NOT NULL);");
+        "CREATE TABLE bmiHistory(id INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "height DOUBLE NOT NULL, weight DOUBLE NOT NULL, age INTEGER NOT NULL,"
+            "weightClass TEXT NOT NULL, result DOUBLE NOT NULL);");
   }
 
-  Future<TestModel> insertTodo(TestModel TestModel) async {
+  Future<BmiModel> insertBMI(BmiModel BmiModel) async {
     var dbClient = await database;
-    await dbClient?.insert('mytodos', TestModel.toJson());
-    return TestModel;
+    await dbClient?.insert('bmiHistory', BmiModel.toJson());
+    return BmiModel;
   }
 
-  Future<List<TestModel>> getTodoList() async {
+  Future<List<BmiModel>> getBMIList() async {
     var dbClient = await database;
     List<Map<String, Object?>> queryResult =
-    await dbClient!.rawQuery('SELECT * FROM mytodos');
+        await dbClient!.rawQuery('SELECT * FROM bmiHistory');
 
-    return queryResult.map((e) => TestModel.fromJson(e)).toList();
+    return queryResult.map((e) => BmiModel.fromJson(e)).toList();
   }
 
-  Future<int> deleteTodo(int id) async {
+  Future<int> deleteBMI(int id) async {
     var dbClient = await database;
-    return await dbClient!.delete('mytodos', where: 'id = ?', whereArgs: [id]);
+    return await dbClient!
+        .delete('bmiHistory', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> deleteDatabase() async {
     io.Directory documentDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentDirectory.path, 'Todos.db');
+    String path = join(documentDirectory.path, 'bmi.db');
     databaseFactory.deleteDatabase(path);
   }
 
-  Future<int> updateTodo(TestModel TestModel) async {
+  Future<int> updateBMI(BmiModel BmiModel) async {
     var dbClient = await database;
-    return await dbClient!.update('mytodos', TestModel.toJson(),
-        where: 'id = ?', whereArgs: [TestModel.id]);
+    return await dbClient!.update('bmiHistory', BmiModel.toJson(),
+        where: 'id = ?', whereArgs: [BmiModel.id]);
   }
 }

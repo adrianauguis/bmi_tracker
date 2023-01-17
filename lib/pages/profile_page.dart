@@ -1,5 +1,5 @@
 import 'package:final_bmi/provider/api_provider.dart';
-import 'package:final_bmi/model/test_model.dart';
+import 'package:final_bmi/model/bmi_model.dart';
 import 'package:final_bmi/pages/bmi_page.dart';
 import 'package:final_bmi/pages/home_page.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +15,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  late Future<List<TestModel>> dataList;
+  late Future<List<BmiModel>> dataList;
 
   loadFromApi()async{
     var apiProvider = TestApiProvider();
