@@ -32,30 +32,57 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         children: [
+
+          const SizedBox(height: 36),
           Container(
             alignment: Alignment.center,
-            height: 100,
-            color: Colors.red,
-            child: const Icon(Icons.account_circle),
+            height: 120,
+            child: const CircleAvatar(
+              radius: 60,
+              backgroundImage: NetworkImage('https://www.thefarmersdog.com/digest'
+                  '/wp-content/uploads/2021/12/corgi-top-1400x871.jpg'),
+            ),
+          ),
+          Card(
+            elevation: 10,
+            shape: RoundedRectangleBorder(
+                side: const BorderSide(color: Colors.white70, width: 1),
+                borderRadius: BorderRadius.circular(15),
+            ),
+            child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                alignment: Alignment.topLeft,
+                height: 200,
+                color: const Color(0xFF967E76),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: const [
+                    Text("Name: Adrian", style: TextStyle(color: Colors.white)),
+                    SizedBox(width: 125),
+                    Text("Surname: Auguis", style: TextStyle(color: Colors.white)),
+                  ],
+                ),
+            )
+          ),
+          Card(
+              elevation: 10,
+              shape: RoundedRectangleBorder(
+                side: const BorderSide(color: Colors.white70, width: 1),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Container(
+                  alignment: Alignment.center,
+                  height: 200,
+                  color: const Color(0xFF967E76),
+                  child: const Text("Wapako ka balo unsa ni dari",
+                      style: TextStyle(color: Colors.white))
+              )
           ),
           Container(
               alignment: Alignment.center,
-              height: 250,
-              color: Colors.green,
-              child: const Text("Details ni dari",
-                  style: TextStyle(color: Colors.white))
-          ),
-          Container(
-              alignment: Alignment.center,
-              height: 200,
-              color: Colors.blue,
-              child: const Text("Wapako ka balo unsa ni dari",
-                  style: TextStyle(color: Colors.white))
-          ),
-          Container(
-              alignment: Alignment.center,
-              height: 80,
+              height: 70,
               child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
