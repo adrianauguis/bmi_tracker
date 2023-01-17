@@ -39,7 +39,7 @@ class _HomePageState extends State<HomePage> {
                     );
                   } else if (snapshot.data!.length == 0) {
                     return const Center(
-                      child: Text('No Todos'),
+                      child: Text('No History'),
                     );
                   } else {
                     return ListView.builder(
