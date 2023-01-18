@@ -197,6 +197,14 @@ class _BMIPageState extends State<BMIPage> {
                             return;
                           }
 
+                          dbProvider!.createData(BmiModel(
+                            height: double.parse(height.text),
+                            weight: double.parse(weight.text),
+                            result: formattedResult.toDouble(),
+                            age: 21,
+                            weightClass: label,
+                          ));
+
                           dbProvider!.insertBMI(BmiModel(
                             height: double.parse(height.text),
                             weight: double.parse(weight.text),

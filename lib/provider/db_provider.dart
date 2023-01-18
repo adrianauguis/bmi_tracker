@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_bmi/model/bmi_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -35,6 +36,13 @@ class DBProvider {
     var dbClient = await database;
     await dbClient?.insert('bmiHistory', BmiModel.toJson());
     return BmiModel;
+  }
+
+  Future<BmiModel> createData(BmiModel bmiModel)async{
+    final dbClient = FirebaseFirestore.instance.collection('bmiHistory').doc();
+
+    await dbClient.set(bmiModel.toJson());
+    return bmiModel;
   }
 
   Future<List<BmiModel>> getBMIList() async {
