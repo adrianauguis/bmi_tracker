@@ -10,7 +10,6 @@ String bmiModelToJson(BmiModel? data) => json.encode(data!.toJson());
 
 class BmiModel {
   BmiModel({
-    this.id,
     this.height,
     this.weight,
     this.age,
@@ -18,7 +17,6 @@ class BmiModel {
     this.result,
   });
 
-  int? id;
   double? height;
   double? weight;
   int? age;
@@ -27,7 +25,6 @@ class BmiModel {
 
 
   factory BmiModel.fromJson(Map<String, dynamic> json) => BmiModel(
-    id: json["id"],
     height: json["height"].toDouble(),
     weight: json["weight"].toDouble(),
     age: json["age"],
@@ -36,7 +33,6 @@ class BmiModel {
   );
 
   Map<String, dynamic> toJson() => {
-    "id": id,
     "height": height,
     "weight": weight,
     "age": age,

@@ -84,9 +84,9 @@ class DBProvider {
     databaseFactory.deleteDatabase(path);
   }
 
-  Future<int> updateBMI(BmiModel BmiModel) async {
-    var dbClient = await database;
-    return await dbClient!.update('bmiHistory', BmiModel.toJson(),
-        where: 'id = ?', whereArgs: [BmiModel.id]);
-  }
+  // Future<int> updateBMI(BmiModel BmiModel) async {
+  //   var dbClient = await database;
+  //   return await dbClient!.update('bmiHistory', BmiModel.toJson(),
+  //       where: 'id = ?', whereArgs: [BmiModel.id]);
+  // }
 }
