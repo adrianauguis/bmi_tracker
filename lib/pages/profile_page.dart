@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_typing_uninitialized_variables
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_bmi/pages/bmi_collection_page.dart';
 import 'package:final_bmi/pages/profile_form_page.dart';
 import 'package:final_bmi/pages/bmi_page.dart';
@@ -31,11 +32,6 @@ class _ProfilePageState extends State<ProfilePage> {
   var receiver;
   var isLoading = false;
 
-
-  // loadFromApi()async{
-  //   var apiProvider = TestApiProvider();
-  //   await apiProvider.getAllTest();
-  // }
 
   buildProfilePage() {
     dataList = dbProvider!.getProfileList();
@@ -233,6 +229,171 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  buildProfileStreamBuilder(){
+    final CollectionReference bmiHistory = FirebaseFirestore.instance.collection('profile');
+    return StreamBuilder(
+        stream: bmiHistory.snapshots(),
+        builder: (context,AsyncSnapshot<QuerySnapshot>streamSnapshot){
+          if(streamSnapshot.hasData){
+            return ListView.builder(
+                padding: const EdgeInsets.all(10),
+                itemCount: streamSnapshot.data!.docs.length,
+                itemBuilder: (context,index){
+                  final DocumentSnapshot documentSnapshot = streamSnapshot.data!.docs[index];
+                  return Column(
+                    children: [
+                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+                      ListTile(
+                        leading: const Icon(Icons.perm_identity),
+                        title: Text.rich(
+                            TextSpan(
+                                text: 'Full Name: ',
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: documentSnapshot['fullName'],
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.indigoAccent
+                                    ),
+                                  )
+                                ]
+                            )
+                        ),
+                      ),
+
+                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+
+                      ListTile(
+                        leading: const Icon(
+                            Icons.onetwothree_outlined),
+                        title: Text.rich(
+                            TextSpan(
+                                text: 'Age: ',
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: documentSnapshot['age'].toString(),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.indigoAccent
+                                    ),
+                                  )
+                                ]
+                            )
+                        ),
+                      ),
+
+                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+
+                      ListTile(
+                        leading: const Icon(Icons.cake_outlined),
+                        title: Text.rich(
+                            TextSpan(
+                                text: 'BirthDate: ',
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: documentSnapshot['birthday'].toString(),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.indigoAccent
+                                    ),
+                                  )
+                                ]
+                            )
+                        ),
+                      ),
+
+                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+
+                      ListTile(
+                        leading: const Icon(
+                            Icons.people_alt_outlined),
+                        title: Text.rich(
+                            TextSpan(
+                                text: 'Gender: ',
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: documentSnapshot['gender'],
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.indigoAccent
+                                    ),
+                                  )
+                                ]
+                            )
+                        ),
+                      ),
+
+                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+
+                      ListTile(
+                        leading: const Icon(Icons.email_outlined),
+                        title: Text.rich(
+                            TextSpan(
+                                text: 'Email Address: ',
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: documentSnapshot['emailAdd'],
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.indigoAccent
+                                    ),
+                                  )
+                                ]
+                            )
+                        ),
+                      ),
+
+                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+
+                      ListTile(
+                        leading: const Icon(Icons.phone),
+                        title: Text.rich(
+                            TextSpan(
+                                text: 'Phone Number: ',
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: documentSnapshot['phoneNum'].toString(),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.indigoAccent
+                                    ),
+                                  )
+                                ]
+                            )
+                        ),
+                      ),
+
+                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+
+                      ListTile(
+                        leading: const Icon(Icons.pin_drop_outlined),
+                        title: Text.rich(
+                            TextSpan(
+                                text: 'Address: ',
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: documentSnapshot['address'],
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.indigoAccent
+                                    ),
+                                  )
+                                ]
+                            )
+                        ),
+                      ),
+
+                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+                    ],
+
+
+                  );
+                });
+          }else{
+            return const CircularProgressIndicator();
+          }
+        });
+  }
 
   @override
   void initState() {
@@ -299,7 +460,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 color: const Color(0xFF967E76),
                 child: isLoading
                     ? const CircularProgressIndicator()
-                    : buildProfilePage()
+                    : buildProfileStreamBuilder()
 
           )
           ),

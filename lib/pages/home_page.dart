@@ -26,10 +26,6 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
-  Widget buildData(BmiModel bmiModel) => ListTile(
-    title: Text(bmiModel.weightClass.toString()),
-    subtitle: Text(bmiModel.result.toString()),
-  );
 
   buildBMIListView() {
     dataList = dbProvider!.getBMIList();
@@ -124,8 +120,61 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Stream<List<BmiModel>> readData() => FirebaseFirestore.instance.collection('bmiHistory')
-      .snapshots().map((snapshot) => snapshot.docs.map((doc) => BmiModel.fromJson(doc.data())).toList());
+  buildBMIStreamBuilder(){
+    final CollectionReference bmiHistory = FirebaseFirestore.instance.collection('bmiHistory');
+    return StreamBuilder(
+        stream: bmiHistory.snapshots(),
+        builder: (context,AsyncSnapshot<QuerySnapshot>streamSnapshot){
+          if(streamSnapshot.hasData){
+            return ListView.builder(
+                padding: const EdgeInsets.all(10),
+                itemCount: streamSnapshot.data!.docs.length,
+                itemBuilder: (context,index){
+                  final DocumentSnapshot documentSnapshot = streamSnapshot.data!.docs[index];
+                  return Dismissible(
+                    key: UniqueKey(),
+                    background: Container(color: Colors.red),
+                    onDismissed: (DismissDirection direction) {
+                      setState(() {
+                        dbProvider!.deleteBMI(documentSnapshot['id']);
+                        dataList = dbProvider!.getBMIList();
+                        // snapshot.data!.remove(snapshot.data![index]);
+                      });
+                    },
+                    child: Card(
+                      elevation: 10,
+                      shape: RoundedRectangleBorder(
+                          side: const BorderSide(color: Colors.white70, width: 1),
+                          borderRadius: BorderRadius.circular(10)),
+                      child: ExpansionTile(
+                        title: Text(documentSnapshot['weightClass']),
+                        subtitle: Text('Result: ${documentSnapshot['result']}'),
+                        backgroundColor: Color(0xFFF8EDE3),
+                        children: [
+                          Container(
+                            color: Color(0xFF85586F),
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 5),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Height: ${documentSnapshot['height']}",style: const TextStyle(color: Colors.white)),
+                                Text("Weight: ${documentSnapshot['weight']}",style: const TextStyle(color: Colors.white)),
+                                Text("Age: ${documentSnapshot['age']}",style: const TextStyle(color: Colors.white))
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                });
+          }else{
+            return const CircularProgressIndicator();
+          }
+        });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +190,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: isloading
           ? const Center(child: Text("Wapay sulod diri ang history"))
-          : buildBMIListView(),
+          : buildBMIStreamBuilder(),
 
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.grey,
