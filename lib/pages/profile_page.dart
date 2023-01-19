@@ -1,8 +1,12 @@
+  import 'package:final_bmi/auth.dart';
 import 'package:final_bmi/provider/api_provider.dart';
 import 'package:final_bmi/model/bmi_model.dart';
 import 'package:final_bmi/pages/bmi_page.dart';
 import 'package:final_bmi/pages/home_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import 'login_register_page.dart';
 
 
 class ProfilePage extends StatefulWidget {
@@ -16,6 +20,15 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   late Future<List<BmiModel>> dataList;
+
+  final User? user = Auth().currentUser!;
+
+  Future<void> signOut()async{
+    FirebaseAuth.instance.signOut();
+    print(Auth().currentUser?.email);
+    await Auth().signOut();
+    Navigator.pop(context);
+  }
 
   loadFromApi()async{
     var apiProvider = TestApiProvider();
@@ -90,6 +103,15 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue),
                   child: const Text("Edit Profile",
+                      style: TextStyle(color: Colors.white)))),
+          Container(
+              alignment: Alignment.center,
+              height: 70,
+              child: ElevatedButton(
+                  onPressed: signOut,
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue),
+                  child: const Text("Log out",
                       style: TextStyle(color: Colors.white))))
         ],
       ),
@@ -108,10 +130,8 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           BottomNavigationBarItem(
             icon: IconButton(
-                onPressed: (){
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => const BMIPage()));
-                }, icon: const Icon(Icons.balance)),
+                onPressed: signOut,
+                icon: const Icon(Icons.balance)),
             label: 'BMI',
           ),
           const BottomNavigationBarItem(
