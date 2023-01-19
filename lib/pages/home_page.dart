@@ -139,9 +139,10 @@ class _HomePageState extends State<HomePage> {
           IconButton(onPressed: () {}, icon: const Icon(Icons.menu)),
         ],
       ),
-      body: isloading? const Center(
-        child: Text("Wapay sulod diri ang history"),
-      ) : buildBMIListView(),
+      body: isloading
+          ? const Center(child: Text("Wapay sulod diri ang history"))
+          : buildBMIListView(),
+
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.grey,
         currentIndex: _selectedIndex,

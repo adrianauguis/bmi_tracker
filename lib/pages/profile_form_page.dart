@@ -2,7 +2,6 @@
 
 //NOTE: USE THIS PAGE CODE FOR THE 2ND OPTION ONLY
 import 'package:final_bmi/model/profile_model.dart';
-import 'package:final_bmi/pages/profile_page.dart';
 import 'package:final_bmi/provider/db_provider.dart';
 import 'package:flutter/material.dart';
 
@@ -24,7 +23,6 @@ class _ProFormState extends State<ProForm> {
   final phoneNum = TextEditingController();
   final address = TextEditingController();
   var gender, sender;
-  Widget? icon;
 
   @override
   void initState() {
@@ -196,17 +194,6 @@ class _ProFormState extends State<ProForm> {
             child: ElevatedButton(
               onPressed: () async {
                 if (formKey.currentState!.validate()) {
-                  // List data = <Map<String, dynamic>>[
-                  //   {
-                  //     'fullName': fullName.text,
-                  //     'age': age.text,
-                  //     'birthdate': birthdate.text,
-                  //     'gender': gender,
-                  //     'email': email.text,
-                  //     'phoneNum': phoneNum.text,
-                  //     'address': address.text,
-                  //   }
-                  // ];
 
                   await dbProvider!.insertProfile(Profile(
                       fullName: fullName.text,
@@ -218,10 +205,6 @@ class _ProFormState extends State<ProForm> {
                       address: address.text
                   ));
 
-                  Navigator.push(
-                      context, MaterialPageRoute(
-                      builder: (context)=> const ProfilePage()));
-
                   sender = await Profile(fullName: fullName.text,
                       age: int.parse(age.text),
                       birthdate: birthdate.text,
@@ -229,6 +212,8 @@ class _ProFormState extends State<ProForm> {
                       email: email.text,
                       phoneNum: phoneNum.text,
                       address: address.text);
+
+                  Navigator.pop(context,sender);
                 }else{
                   return;
                 }

@@ -2,7 +2,6 @@
 
 import 'package:final_bmi/pages/bmi_collection_page.dart';
 import 'package:final_bmi/pages/profile_form_page.dart';
-import 'package:final_bmi/provider/api_provider.dart';
 import 'package:final_bmi/pages/bmi_page.dart';
 import 'package:final_bmi/pages/home_page.dart';
 import 'package:flutter/material.dart';
@@ -30,36 +29,13 @@ class _ProfilePageState extends State<ProfilePage> {
   late Future<List<Profile>> dataList;
   List <Profile> datas = [];
   var receiver;
+  var isLoading = false;
 
-  // buildDetails(List info){
-  //   var index = info[0];
-  //   return ListView(
-  //     children: const [
-  //       ListTile(
-  //         leading: Icon(Icons.perm_identity),
-  //         title: Text.rich(
-  //             TextSpan(
-  //                 text: 'Full Name: ',
-  //                 children: <TextSpan>[
-  //                   TextSpan(
-  //                     text: "",
-  //                     style: TextStyle(
-  //                         fontWeight: FontWeight.bold,
-  //                         color: Colors.indigoAccent
-  //                     ),
-  //                   )
-  //                 ]
-  //             )
-  //         ),
-  //       ),
-  //     ],
-  //   );
+
+  // loadFromApi()async{
+  //   var apiProvider = TestApiProvider();
+  //   await apiProvider.getAllTest();
   // }
-
-  loadFromApi()async{
-    var apiProvider = TestApiProvider();
-    await apiProvider.getAllTest();
-  }
 
   buildProfilePage() {
     dataList = dbProvider!.getProfileList();
@@ -73,7 +49,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     return const Center(
                       child: CircularProgressIndicator(),
                     );
-                  } else if (snapshot.data!.length == 0) {
+                  } else if (snapshot.data!.isEmpty) {
                     return const Center(
                       child: Text('No Profile Details'),
                     );
@@ -258,8 +234,6 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
 
-
-
   @override
   void initState() {
     dbProvider = DBProvider();
@@ -289,7 +263,7 @@ class _ProfilePageState extends State<ProfilePage> {
               height: 70,
               child: ElevatedButton(
                   onPressed: ()async{
-                    await Navigator.push(
+                   receiver = await Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => const ProForm()
@@ -321,162 +295,12 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 alignment: Alignment.topLeft,
-                height: 300,
+                height: 412,
                 color: const Color(0xFF967E76),
-                child: datas.isEmpty
-                    ? Container()
+                child: isLoading
+                    ? const CircularProgressIndicator()
                     : buildProfilePage()
 
-
-                // ListView.builder(
-                //   itemCount: datas.length,
-                //     itemBuilder: (context,index){
-                //     var info = datas[index];
-                //     return ListView(
-                //       children: [
-                //         // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-                //         ListTile(
-                //           leading: const Icon(Icons.perm_identity),
-                //           title: Text.rich(
-                //               TextSpan(
-                //                   text: 'Full Name: ',
-                //                   children: <TextSpan>[
-                //                     TextSpan(
-                //                       text: info.fullName,
-                //                       style: const TextStyle(
-                //                           fontWeight: FontWeight.bold,
-                //                           color: Colors.indigoAccent
-                //                       ),
-                //                     )
-                //                   ]
-                //               )
-                //           ),
-                //         ),
-                //
-                //         // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-                //
-                //         ListTile(
-                //           leading: const Icon(Icons.onetwothree_outlined),
-                //           title: Text.rich(
-                //               TextSpan(
-                //                   text: 'Age: ',
-                //                   children: <TextSpan>[
-                //                     TextSpan(
-                //                       text: info.age.toString(),
-                //                       style: const TextStyle(
-                //                           fontWeight: FontWeight.bold,
-                //                           color: Colors.indigoAccent
-                //                       ),
-                //                     )
-                //                   ]
-                //               )
-                //           ),
-                //         ),
-                //
-                //         // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-                //
-                //         ListTile(
-                //           leading: const Icon(Icons.cake_outlined),
-                //           title: Text.rich(
-                //               TextSpan(
-                //                   text: 'BirthDate: ',
-                //                   children: <TextSpan>[
-                //                     TextSpan(
-                //                       text: info.birthdate,
-                //                       style: const TextStyle(
-                //                           fontWeight: FontWeight.bold,
-                //                           color: Colors.indigoAccent
-                //                       ),
-                //                     )
-                //                   ]
-                //               )
-                //           ),
-                //         ),
-                //
-                //         // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-                //
-                //         ListTile(
-                //           leading: const Icon(Icons.people_alt_outlined),
-                //           title: Text.rich(
-                //               TextSpan(
-                //                   text: 'Gender: ',
-                //                   children: <TextSpan>[
-                //                     TextSpan(
-                //                       text: info.gender,
-                //                       style: const TextStyle(
-                //                           fontWeight: FontWeight.bold,
-                //                           color: Colors.indigoAccent
-                //                       ),
-                //                     )
-                //                   ]
-                //               )
-                //           ),
-                //         ),
-                //
-                //         // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-                //
-                //         ListTile(
-                //           leading: const Icon(Icons.email_outlined),
-                //           title: Text.rich(
-                //               TextSpan(
-                //                   text: 'Email Address: ',
-                //                   children: <TextSpan>[
-                //                     TextSpan(
-                //                       text: info.email,
-                //                       style: const TextStyle(
-                //                           fontWeight: FontWeight.bold,
-                //                           color: Colors.indigoAccent
-                //                       ),
-                //                     )
-                //                   ]
-                //               )
-                //           ),
-                //         ),
-                //
-                //         // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-                //
-                //         ListTile(
-                //           leading: const Icon(Icons.phone),
-                //           title: Text.rich(
-                //               TextSpan(
-                //                   text: 'Phone Number: ',
-                //                   children: <TextSpan>[
-                //                     TextSpan(
-                //                       text: info.phoneNum,
-                //                       style: const TextStyle(
-                //                           fontWeight: FontWeight.bold,
-                //                           color: Colors.indigoAccent
-                //                       ),
-                //                     )
-                //                   ]
-                //               )
-                //           ),
-                //         ),
-                //
-                //         // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-                //
-                //         ListTile(
-                //           leading: const Icon(Icons.pin_drop_outlined),
-                //           title: Text.rich(
-                //               TextSpan(
-                //                   text: 'Address: ',
-                //                   children: <TextSpan>[
-                //                     TextSpan(
-                //                       text: info.address,
-                //                       style: const TextStyle(
-                //                           fontWeight: FontWeight.bold,
-                //                           color: Colors.indigoAccent
-                //                       ),
-                //                     )
-                //                   ]
-                //               )
-                //           ),
-                //         ),
-                //
-                //         // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-                //       ],
-                //     );
-                //     })
           )
           ),
           Card(
