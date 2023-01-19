@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:final_bmi/model/test_model.dart';
+import 'package:final_bmi/model/bmi_model.dart';
 
 class TestApiProvider {
-  Future<List<TestModel?>> getAllTest() async {
+  Future<List<BmiModel?>> getAllTest() async {
     var url = "https://api.sampleapis.com/presidents/presidents";
     Response response = await Dio().get(url);
 
