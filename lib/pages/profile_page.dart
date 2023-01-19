@@ -1,30 +1,268 @@
+// ignore_for_file: prefer_typing_uninitialized_variables
+
+import 'package:final_bmi/pages/bmi_collection_page.dart';
+import 'package:final_bmi/pages/profile_form_page.dart';
 import 'package:final_bmi/provider/api_provider.dart';
-import 'package:final_bmi/model/bmi_model.dart';
 import 'package:final_bmi/pages/bmi_page.dart';
 import 'package:final_bmi/pages/home_page.dart';
 import 'package:flutter/material.dart';
 
+import '../model/profile_model.dart';
+import '../provider/db_provider.dart';
 
 class ProfilePage extends StatefulWidget {
   final int? selectedIndex;
 
-  const ProfilePage({Key? key, this.selectedIndex}) : super(key: key);
+  final dynamic data;
+
+  const ProfilePage({
+    Key? key,
+    this.selectedIndex,
+    this.data,
+  }) : super(key: key);
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  late Future<List<BmiModel>> dataList;
+  DBProvider? dbProvider;
+  late Future<List<Profile>> dataList;
+  List <Profile> datas = [];
+  var receiver;
+
+  // buildDetails(List info){
+  //   var index = info[0];
+  //   return ListView(
+  //     children: const [
+  //       ListTile(
+  //         leading: Icon(Icons.perm_identity),
+  //         title: Text.rich(
+  //             TextSpan(
+  //                 text: 'Full Name: ',
+  //                 children: <TextSpan>[
+  //                   TextSpan(
+  //                     text: "",
+  //                     style: TextStyle(
+  //                         fontWeight: FontWeight.bold,
+  //                         color: Colors.indigoAccent
+  //                     ),
+  //                   )
+  //                 ]
+  //             )
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   loadFromApi()async{
     var apiProvider = TestApiProvider();
     await apiProvider.getAllTest();
   }
 
+  buildProfilePage() {
+    dataList = dbProvider!.getProfileList();
+    return Column(
+      children: [
+        Expanded(
+            child: FutureBuilder(
+                future: dataList,
+                builder: (context, AsyncSnapshot<List<Profile>> snapshot) {
+                  if (!snapshot.hasData || snapshot.data == null) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (snapshot.data!.length == 0) {
+                    return const Center(
+                      child: Text('No Profile Details'),
+                    );
+                  } else {
+                    return ListView.builder(
+                        padding: const EdgeInsets.all(10),
+                        shrinkWrap: true,
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (context, index) {
+                          String fname = snapshot.data![index].fullName!
+                              .toString();
+                          String bday =
+                          snapshot.data![index].birthdate!.toString();
+                          String gender =
+                          snapshot.data![index].gender!.toString();
+                          String email =
+                          snapshot.data![index].email!.toString();
+                          String phoneNum =
+                          snapshot.data![index].phoneNum!.toString();
+                          String address =
+                          snapshot.data![index].address!.toString();
+                          int age =
+                          snapshot.data![index].age!.toInt();
+                          return
+                            Column(
+                              children: [
+                                // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+                                ListTile(
+                                  leading: const Icon(Icons.perm_identity),
+                                  title: Text.rich(
+                                      TextSpan(
+                                          text: 'Full Name: ',
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                              text: fname,
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.indigoAccent
+                                              ),
+                                            )
+                                          ]
+                                      )
+                                  ),
+                                ),
+
+                                // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+
+                                ListTile(
+                                  leading: const Icon(
+                                      Icons.onetwothree_outlined),
+                                  title: Text.rich(
+                                      TextSpan(
+                                          text: 'Age: ',
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                              text: age.toString(),
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.indigoAccent
+                                              ),
+                                            )
+                                          ]
+                                      )
+                                  ),
+                                ),
+
+                                // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+
+                                ListTile(
+                                  leading: const Icon(Icons.cake_outlined),
+                                  title: Text.rich(
+                                      TextSpan(
+                                          text: 'BirthDate: ',
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                              text: bday,
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.indigoAccent
+                                              ),
+                                            )
+                                          ]
+                                      )
+                                  ),
+                                ),
+
+                                // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+
+                                ListTile(
+                                  leading: const Icon(
+                                      Icons.people_alt_outlined),
+                                  title: Text.rich(
+                                      TextSpan(
+                                          text: 'Gender: ',
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                              text: gender,
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.indigoAccent
+                                              ),
+                                            )
+                                          ]
+                                      )
+                                  ),
+                                ),
+
+                                // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+
+                                ListTile(
+                                  leading: const Icon(Icons.email_outlined),
+                                  title: Text.rich(
+                                      TextSpan(
+                                          text: 'Email Address: ',
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                              text: email,
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.indigoAccent
+                                              ),
+                                            )
+                                          ]
+                                      )
+                                  ),
+                                ),
+
+                                // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+
+                                ListTile(
+                                  leading: const Icon(Icons.phone),
+                                  title: Text.rich(
+                                      TextSpan(
+                                          text: 'Phone Number: ',
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                              text: phoneNum,
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.indigoAccent
+                                              ),
+                                            )
+                                          ]
+                                      )
+                                  ),
+                                ),
+
+                                // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+
+                                ListTile(
+                                  leading: const Icon(Icons.pin_drop_outlined),
+                                  title: Text.rich(
+                                      TextSpan(
+                                          text: 'Address: ',
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                              text: address,
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.indigoAccent
+                                              ),
+                                            )
+                                          ]
+                                      )
+                                  ),
+                                ),
+
+                                // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+                              ],
+
+
+                            );
+                        }
+                    );
+
+                  }
+                }
+                  )
+    ),
+      ],
+    );
+  }
+
+
+
+
   @override
   void initState() {
-
+    dbProvider = DBProvider();
     super.initState();
   }
 
@@ -45,26 +283,201 @@ class _ProfilePageState extends State<ProfilePage> {
                   '/wp-content/uploads/2021/12/corgi-top-1400x871.jpg'),
             ),
           ),
+
+          Container(
+              alignment: Alignment.center,
+              height: 70,
+              child: ElevatedButton(
+                  onPressed: ()async{
+                    await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ProForm()
+                        )
+                    );
+                    if (receiver != null ){
+                      setState(() {
+                        datas.add(receiver);
+                      });
+                    }else{
+                      return;
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue),
+                  child: const Text("Edit Profile",
+                      style: TextStyle(color: Colors.white)
+                  )
+              )
+          ),
+
           Card(
             elevation: 10,
             shape: RoundedRectangleBorder(
                 side: const BorderSide(color: Colors.white70, width: 1),
                 borderRadius: BorderRadius.circular(15),
             ),
+
             child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 alignment: Alignment.topLeft,
-                height: 200,
+                height: 300,
                 color: const Color(0xFF967E76),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: const [
-                    Text("Name: Adrian", style: TextStyle(color: Colors.white)),
-                    SizedBox(width: 125),
-                    Text("Surname: Auguis", style: TextStyle(color: Colors.white)),
-                  ],
-                ),
-            )
+                child: datas.isEmpty
+                    ? Container()
+                    : buildProfilePage()
+
+
+                // ListView.builder(
+                //   itemCount: datas.length,
+                //     itemBuilder: (context,index){
+                //     var info = datas[index];
+                //     return ListView(
+                //       children: [
+                //         // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+                //         ListTile(
+                //           leading: const Icon(Icons.perm_identity),
+                //           title: Text.rich(
+                //               TextSpan(
+                //                   text: 'Full Name: ',
+                //                   children: <TextSpan>[
+                //                     TextSpan(
+                //                       text: info.fullName,
+                //                       style: const TextStyle(
+                //                           fontWeight: FontWeight.bold,
+                //                           color: Colors.indigoAccent
+                //                       ),
+                //                     )
+                //                   ]
+                //               )
+                //           ),
+                //         ),
+                //
+                //         // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+                //
+                //         ListTile(
+                //           leading: const Icon(Icons.onetwothree_outlined),
+                //           title: Text.rich(
+                //               TextSpan(
+                //                   text: 'Age: ',
+                //                   children: <TextSpan>[
+                //                     TextSpan(
+                //                       text: info.age.toString(),
+                //                       style: const TextStyle(
+                //                           fontWeight: FontWeight.bold,
+                //                           color: Colors.indigoAccent
+                //                       ),
+                //                     )
+                //                   ]
+                //               )
+                //           ),
+                //         ),
+                //
+                //         // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+                //
+                //         ListTile(
+                //           leading: const Icon(Icons.cake_outlined),
+                //           title: Text.rich(
+                //               TextSpan(
+                //                   text: 'BirthDate: ',
+                //                   children: <TextSpan>[
+                //                     TextSpan(
+                //                       text: info.birthdate,
+                //                       style: const TextStyle(
+                //                           fontWeight: FontWeight.bold,
+                //                           color: Colors.indigoAccent
+                //                       ),
+                //                     )
+                //                   ]
+                //               )
+                //           ),
+                //         ),
+                //
+                //         // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+                //
+                //         ListTile(
+                //           leading: const Icon(Icons.people_alt_outlined),
+                //           title: Text.rich(
+                //               TextSpan(
+                //                   text: 'Gender: ',
+                //                   children: <TextSpan>[
+                //                     TextSpan(
+                //                       text: info.gender,
+                //                       style: const TextStyle(
+                //                           fontWeight: FontWeight.bold,
+                //                           color: Colors.indigoAccent
+                //                       ),
+                //                     )
+                //                   ]
+                //               )
+                //           ),
+                //         ),
+                //
+                //         // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+                //
+                //         ListTile(
+                //           leading: const Icon(Icons.email_outlined),
+                //           title: Text.rich(
+                //               TextSpan(
+                //                   text: 'Email Address: ',
+                //                   children: <TextSpan>[
+                //                     TextSpan(
+                //                       text: info.email,
+                //                       style: const TextStyle(
+                //                           fontWeight: FontWeight.bold,
+                //                           color: Colors.indigoAccent
+                //                       ),
+                //                     )
+                //                   ]
+                //               )
+                //           ),
+                //         ),
+                //
+                //         // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+                //
+                //         ListTile(
+                //           leading: const Icon(Icons.phone),
+                //           title: Text.rich(
+                //               TextSpan(
+                //                   text: 'Phone Number: ',
+                //                   children: <TextSpan>[
+                //                     TextSpan(
+                //                       text: info.phoneNum,
+                //                       style: const TextStyle(
+                //                           fontWeight: FontWeight.bold,
+                //                           color: Colors.indigoAccent
+                //                       ),
+                //                     )
+                //                   ]
+                //               )
+                //           ),
+                //         ),
+                //
+                //         // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+                //
+                //         ListTile(
+                //           leading: const Icon(Icons.pin_drop_outlined),
+                //           title: Text.rich(
+                //               TextSpan(
+                //                   text: 'Address: ',
+                //                   children: <TextSpan>[
+                //                     TextSpan(
+                //                       text: info.address,
+                //                       style: const TextStyle(
+                //                           fontWeight: FontWeight.bold,
+                //                           color: Colors.indigoAccent
+                //                       ),
+                //                     )
+                //                   ]
+                //               )
+                //           ),
+                //         ),
+                //
+                //         // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+                //       ],
+                //     );
+                //     })
+          )
           ),
           Card(
               elevation: 10,
@@ -76,21 +489,25 @@ class _ProfilePageState extends State<ProfilePage> {
                   alignment: Alignment.center,
                   height: 200,
                   color: const Color(0xFF967E76),
-                  child: const Text("Wapako ka balo unsa ni dari",
-                      style: TextStyle(color: Colors.white))
+                  child: ElevatedButton(
+                    onPressed: (){
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const BmiCollection()
+                          )
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.brown
+                    ),
+                    child: const Text(
+                        'BMI Collection',
+                        style: TextStyle(color: Colors.white)
+                    ),
+                  ),
               )
           ),
-          Container(
-              alignment: Alignment.center,
-              height: 70,
-              child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue),
-                  child: const Text("Edit Profile",
-                      style: TextStyle(color: Colors.white))))
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
