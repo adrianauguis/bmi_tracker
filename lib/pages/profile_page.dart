@@ -26,12 +26,17 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  final CollectionReference profile = FirebaseFirestore.instance.collection('profile');
+  late DocumentSnapshot docToEdit;
   DBProvider? dbProvider;
   late Future<List<Profile>> dataList;
   List <Profile> datas = [];
   var receiver;
   var isLoading = false;
 
+  setDoc(DocumentSnapshot documentSnapshot){
+    docToEdit = documentSnapshot;
+  }
 
   buildProfilePage() {
     dataList = dbProvider!.getProfileList();
@@ -230,16 +235,16 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   buildProfileStreamBuilder(){
-    final CollectionReference bmiHistory = FirebaseFirestore.instance.collection('profile');
     return StreamBuilder(
-        stream: bmiHistory.snapshots(),
+        stream: profile.snapshots(),
         builder: (context,AsyncSnapshot<QuerySnapshot>streamSnapshot){
           if(streamSnapshot.hasData){
             return ListView.builder(
                 padding: const EdgeInsets.all(10),
                 itemCount: streamSnapshot.data!.docs.length,
                 itemBuilder: (context,index){
-                  final DocumentSnapshot documentSnapshot = streamSnapshot.data!.docs[index];
+                  DocumentSnapshot documentSnapshot = streamSnapshot.data!.docs[index];
+                  setDoc(documentSnapshot);
                   return Column(
                     children: [
                       // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
@@ -291,7 +296,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 text: 'BirthDate: ',
                                 children: <TextSpan>[
                                   TextSpan(
-                                    text: documentSnapshot['birthday'].toString(),
+                                    text: documentSnapshot['birthdate'].toString(),
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.indigoAccent
@@ -427,7 +432,7 @@ class _ProfilePageState extends State<ProfilePage> {
                    receiver = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const ProForm()
+                            builder: (context) => ProForm(docU: docToEdit,)
                         )
                     );
                     if (receiver != null ){
@@ -472,7 +477,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               child: Container(
                   alignment: Alignment.center,
-                  height: 200,
+                  height: 100,
                   color: const Color(0xFF967E76),
                   child: ElevatedButton(
                     onPressed: (){

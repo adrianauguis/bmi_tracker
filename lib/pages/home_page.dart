@@ -14,6 +14,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final CollectionReference bmiHistory = FirebaseFirestore.instance.collection('bmiHistory');
   DBProvider? dbProvider;
   late Future<List<BmiModel>> dataList;
   int _selectedIndex = 0;
@@ -26,6 +27,9 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
+  Future <void> deleteData(String productId)async{
+    await bmiHistory.doc(productId).delete();
+  }
 
   buildBMIListView() {
     dataList = dbProvider!.getBMIList();
@@ -121,7 +125,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   buildBMIStreamBuilder(){
-    final CollectionReference bmiHistory = FirebaseFirestore.instance.collection('bmiHistory');
     return StreamBuilder(
         stream: bmiHistory.snapshots(),
         builder: (context,AsyncSnapshot<QuerySnapshot>streamSnapshot){
@@ -136,8 +139,9 @@ class _HomePageState extends State<HomePage> {
                     background: Container(color: Colors.red),
                     onDismissed: (DismissDirection direction) {
                       setState(() {
-                        dbProvider!.deleteBMI(documentSnapshot['id']);
-                        dataList = dbProvider!.getBMIList();
+                        deleteData(documentSnapshot.id);
+                        // dbProvider!.deleteBMI(documentSnapshot['id']);
+                        // dataList = dbProvider!.getBMIList();
                         // snapshot.data!.remove(snapshot.data![index]);
                       });
                     },

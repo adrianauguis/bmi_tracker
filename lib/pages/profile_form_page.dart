@@ -1,18 +1,21 @@
 // ignore_for_file: prefer_typing_uninitialized_variables
 
 //NOTE: USE THIS PAGE CODE FOR THE 2ND OPTION ONLY
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_bmi/model/profile_model.dart';
 import 'package:final_bmi/provider/db_provider.dart';
 import 'package:flutter/material.dart';
 
 class ProForm extends StatefulWidget {
-  const ProForm({Key? key}) : super(key: key);
+  DocumentSnapshot docU;
+  ProForm({Key? key, required this.docU}) : super(key: key);
 
   @override
   State<ProForm> createState() => _ProFormState();
 }
 
 class _ProFormState extends State<ProForm> {
+  final CollectionReference profile = FirebaseFirestore.instance.collection('profile');
   DBProvider? dbProvider;
   final formKey = GlobalKey<FormState>();
 
@@ -24,18 +27,27 @@ class _ProFormState extends State<ProForm> {
   final address = TextEditingController();
   var gender, sender;
 
+
   @override
   void initState() {
     dbProvider = DBProvider();
     super.initState();
   }
 
-  buildProfilePage() {
-
-  }
 
   @override
   Widget build(BuildContext context) {
+    DocumentSnapshot newDoc = widget.docU;
+    if (newDoc != null){
+      fullName.text = newDoc['fullName'];
+      age.text = newDoc['age'].toString();
+      birthdate.text = newDoc['birthdate'];
+      email.text = newDoc['emailAdd'];
+      phoneNum.text = newDoc['phoneNum'].toString();
+      address.text = newDoc['address'];
+      gender = newDoc['gender'];
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey,
@@ -117,6 +129,7 @@ class _ProFormState extends State<ProForm> {
                   ),
                   const SizedBox(height: 7),
                   DropdownButtonFormField(
+                      value: gender,
                       decoration: const InputDecoration(
                           labelText: "Gender:",
                           border: OutlineInputBorder()
@@ -194,6 +207,17 @@ class _ProFormState extends State<ProForm> {
             child: ElevatedButton(
               onPressed: () async {
                 if (formKey.currentState!.validate()) {
+
+
+                  await profile.doc(newDoc.id).update({
+                    "fullName": fullName.text,
+                    "age": int.parse(age.text),
+                    "birthdate": birthdate.text,
+                    "gender": gender,
+                    "email": email.text,
+                    "phoneNum": int.parse(phoneNum.text),
+                    "address": address.text
+                  });
 
                   await dbProvider!.insertProfile(Profile(
                       fullName: fullName.text,
