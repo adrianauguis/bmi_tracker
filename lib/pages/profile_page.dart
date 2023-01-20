@@ -1,11 +1,11 @@
 // ignore_for_file: prefer_typing_uninitialized_variables
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:final_bmi/pages/bmi_collection_page.dart';
 import 'package:final_bmi/pages/profile_form_page.dart';
 import 'package:final_bmi/pages/bmi_page.dart';
 import 'package:final_bmi/pages/home_page.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../model/profile_model.dart';
 import '../provider/db_provider.dart';
@@ -27,6 +27,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final CollectionReference profile = FirebaseFirestore.instance.collection('profile');
+  final CollectionReference bmiHistory = FirebaseFirestore.instance.collection('bmiHistory');
   late DocumentSnapshot docToEdit;
   DBProvider? dbProvider;
   late Future<List<Profile>> dataList;
@@ -38,201 +39,205 @@ class _ProfilePageState extends State<ProfilePage> {
     docToEdit = documentSnapshot;
   }
 
-  buildProfilePage() {
-    dataList = dbProvider!.getProfileList();
-    return Column(
-      children: [
-        Expanded(
-            child: FutureBuilder(
-                future: dataList,
-                builder: (context, AsyncSnapshot<List<Profile>> snapshot) {
-                  if (!snapshot.hasData || snapshot.data == null) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (snapshot.data!.isEmpty) {
-                    return const Center(
-                      child: Text('No Profile Details'),
-                    );
-                  } else {
-                    return ListView.builder(
-                        padding: const EdgeInsets.all(10),
-                        shrinkWrap: true,
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          String fname = snapshot.data![index].fullName!
-                              .toString();
-                          String bday =
-                          snapshot.data![index].birthdate!.toString();
-                          String gender =
-                          snapshot.data![index].gender!.toString();
-                          String email =
-                          snapshot.data![index].email!.toString();
-                          String phoneNum =
-                          snapshot.data![index].phoneNum!.toString();
-                          String address =
-                          snapshot.data![index].address!.toString();
-                          int age =
-                          snapshot.data![index].age!.toInt();
-                          return
-                            Column(
-                              children: [
-                                // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-                                ListTile(
-                                  leading: const Icon(Icons.perm_identity),
-                                  title: Text.rich(
-                                      TextSpan(
-                                          text: 'Full Name: ',
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                              text: fname,
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.indigoAccent
-                                              ),
-                                            )
-                                          ]
-                                      )
-                                  ),
-                                ),
-
-                                // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-
-                                ListTile(
-                                  leading: const Icon(
-                                      Icons.onetwothree_outlined),
-                                  title: Text.rich(
-                                      TextSpan(
-                                          text: 'Age: ',
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                              text: age.toString(),
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.indigoAccent
-                                              ),
-                                            )
-                                          ]
-                                      )
-                                  ),
-                                ),
-
-                                // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-
-                                ListTile(
-                                  leading: const Icon(Icons.cake_outlined),
-                                  title: Text.rich(
-                                      TextSpan(
-                                          text: 'BirthDate: ',
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                              text: bday,
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.indigoAccent
-                                              ),
-                                            )
-                                          ]
-                                      )
-                                  ),
-                                ),
-
-                                // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-
-                                ListTile(
-                                  leading: const Icon(
-                                      Icons.people_alt_outlined),
-                                  title: Text.rich(
-                                      TextSpan(
-                                          text: 'Gender: ',
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                              text: gender,
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.indigoAccent
-                                              ),
-                                            )
-                                          ]
-                                      )
-                                  ),
-                                ),
-
-                                // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-
-                                ListTile(
-                                  leading: const Icon(Icons.email_outlined),
-                                  title: Text.rich(
-                                      TextSpan(
-                                          text: 'Email Address: ',
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                              text: email,
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.indigoAccent
-                                              ),
-                                            )
-                                          ]
-                                      )
-                                  ),
-                                ),
-
-                                // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-
-                                ListTile(
-                                  leading: const Icon(Icons.phone),
-                                  title: Text.rich(
-                                      TextSpan(
-                                          text: 'Phone Number: ',
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                              text: phoneNum,
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.indigoAccent
-                                              ),
-                                            )
-                                          ]
-                                      )
-                                  ),
-                                ),
-
-                                // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-
-                                ListTile(
-                                  leading: const Icon(Icons.pin_drop_outlined),
-                                  title: Text.rich(
-                                      TextSpan(
-                                          text: 'Address: ',
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                              text: address,
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.indigoAccent
-                                              ),
-                                            )
-                                          ]
-                                      )
-                                  ),
-                                ),
-
-                                // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-                              ],
-
-
-                            );
-                        }
-                    );
-
-                  }
-                }
-                  )
-    ),
-      ],
-    );
+  Future <void> deleteData(String productId)async{
+    await bmiHistory.doc(productId).delete();
   }
+
+  // buildProfilePage() {
+  //   dataList = dbProvider!.getProfileList();
+  //   return Column(
+  //     children: [
+  //       Expanded(
+  //           child: FutureBuilder(
+  //               future: dataList,
+  //               builder: (context, AsyncSnapshot<List<Profile>> snapshot) {
+  //                 if (!snapshot.hasData || snapshot.data == null) {
+  //                   return const Center(
+  //                     child: CircularProgressIndicator(),
+  //                   );
+  //                 } else if (snapshot.data!.isEmpty) {
+  //                   return const Center(
+  //                     child: Text('No Profile Details'),
+  //                   );
+  //                 } else {
+  //                   return ListView.builder(
+  //                       padding: const EdgeInsets.all(10),
+  //                       shrinkWrap: true,
+  //                       itemCount: snapshot.data!.length,
+  //                       itemBuilder: (context, index) {
+  //                         String fname = snapshot.data![index].fullName!
+  //                             .toString();
+  //                         String bday =
+  //                         snapshot.data![index].birthdate!.toString();
+  //                         String gender =
+  //                         snapshot.data![index].gender!.toString();
+  //                         String email =
+  //                         snapshot.data![index].email!.toString();
+  //                         String phoneNum =
+  //                         snapshot.data![index].phoneNum!.toString();
+  //                         String address =
+  //                         snapshot.data![index].address!.toString();
+  //                         int age =
+  //                         snapshot.data![index].age!.toInt();
+  //                         return
+  //                           Column(
+  //                             children: [
+  //                               // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+  //                               ListTile(
+  //                                 leading: const Icon(Icons.perm_identity),
+  //                                 title: Text.rich(
+  //                                     TextSpan(
+  //                                         text: 'Full Name: ',
+  //                                         children: <TextSpan>[
+  //                                           TextSpan(
+  //                                             text: fname,
+  //                                             style: const TextStyle(
+  //                                                 fontWeight: FontWeight.bold,
+  //                                                 color: Colors.white
+  //                                             ),
+  //                                           )
+  //                                         ]
+  //                                     )
+  //                                 ),
+  //                               ),
+  //
+  //                               // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+  //
+  //                               ListTile(
+  //                                 leading: const Icon(
+  //                                     Icons.onetwothree_outlined),
+  //                                 title: Text.rich(
+  //                                     TextSpan(
+  //                                         text: 'Age: ',
+  //                                         children: <TextSpan>[
+  //                                           TextSpan(
+  //                                             text: age.toString(),
+  //                                             style: const TextStyle(
+  //                                                 fontWeight: FontWeight.bold,
+  //                                                 color: Colors.white
+  //                                             ),
+  //                                           )
+  //                                         ]
+  //                                     )
+  //                                 ),
+  //                               ),
+  //
+  //                               // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+  //
+  //                               ListTile(
+  //                                 leading: const Icon(Icons.cake_outlined),
+  //                                 title: Text.rich(
+  //                                     TextSpan(
+  //                                         text: 'BirthDate: ',
+  //                                         children: <TextSpan>[
+  //                                           TextSpan(
+  //                                             text: bday,
+  //                                             style: const TextStyle(
+  //                                                 fontWeight: FontWeight.bold,
+  //                                                 color: Colors.white
+  //                                             ),
+  //                                           )
+  //                                         ]
+  //                                     )
+  //                                 ),
+  //                               ),
+  //
+  //                               // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+  //
+  //                               ListTile(
+  //                                 leading: const Icon(
+  //                                     Icons.people_alt_outlined),
+  //                                 title: Text.rich(
+  //                                     TextSpan(
+  //                                         text: 'Gender: ',
+  //                                         children: <TextSpan>[
+  //                                           TextSpan(
+  //                                             text: gender,
+  //                                             style: const TextStyle(
+  //                                                 fontWeight: FontWeight.bold,
+  //                                                 color: Colors.white
+  //                                             ),
+  //                                           )
+  //                                         ]
+  //                                     )
+  //                                 ),
+  //                               ),
+  //
+  //                               // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+  //
+  //                               ListTile(
+  //                                 leading: const Icon(Icons.email_outlined),
+  //                                 title: Text.rich(
+  //                                     TextSpan(
+  //                                         text: 'Email Address: ',
+  //                                         children: <TextSpan>[
+  //                                           TextSpan(
+  //                                             text: email,
+  //                                             style: const TextStyle(
+  //                                                 fontWeight: FontWeight.bold,
+  //                                                 color: Colors.white
+  //                                             ),
+  //                                           )
+  //                                         ]
+  //                                     )
+  //                                 ),
+  //                               ),
+  //
+  //                               // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+  //
+  //                               ListTile(
+  //                                 leading: const Icon(Icons.phone),
+  //                                 title: Text.rich(
+  //                                     TextSpan(
+  //                                         text: 'Phone Number: ',
+  //                                         children: <TextSpan>[
+  //                                           TextSpan(
+  //                                             text: phoneNum,
+  //                                             style: const TextStyle(
+  //                                                 fontWeight: FontWeight.bold,
+  //                                                 color: Colors.white
+  //                                             ),
+  //                                           )
+  //                                         ]
+  //                                     )
+  //                                 ),
+  //                               ),
+  //
+  //                               // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+  //
+  //                               ListTile(
+  //                                 leading: const Icon(Icons.pin_drop_outlined),
+  //                                 title: Text.rich(
+  //                                     TextSpan(
+  //                                         text: 'Address: ',
+  //                                         children: <TextSpan>[
+  //                                           TextSpan(
+  //                                             text: address,
+  //                                             style: const TextStyle(
+  //                                                 fontWeight: FontWeight.bold,
+  //                                                 color: Colors.white
+  //                                             ),
+  //                                           )
+  //                                         ]
+  //                                     )
+  //                                 ),
+  //                               ),
+  //
+  //                               // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+  //                             ],
+  //
+  //
+  //                           );
+  //                       }
+  //                   );
+  //
+  //                 }
+  //               }
+  //                 )
+  //   ),
+  //     ],
+  //   );
+  // }
 
   buildProfileStreamBuilder(){
     return StreamBuilder(
@@ -258,7 +263,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     text: documentSnapshot['fullName'],
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.indigoAccent
+                                        color: Colors.white
                                     ),
                                   )
                                 ]
@@ -279,35 +284,13 @@ class _ProfilePageState extends State<ProfilePage> {
                                     text: documentSnapshot['age'].toString(),
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.indigoAccent
+                                        color: Colors.white
                                     ),
                                   )
                                 ]
                             )
                         ),
                       ),
-
-                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-
-                      ListTile(
-                        leading: const Icon(Icons.cake_outlined),
-                        title: Text.rich(
-                            TextSpan(
-                                text: 'BirthDate: ',
-                                children: <TextSpan>[
-                                  TextSpan(
-                                    text: documentSnapshot['birthdate'].toString(),
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.indigoAccent
-                                    ),
-                                  )
-                                ]
-                            )
-                        ),
-                      ),
-
-                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
 
                       ListTile(
                         leading: const Icon(
@@ -320,7 +303,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     text: documentSnapshot['gender'],
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.indigoAccent
+                                        color: Colors.white
                                     ),
                                   )
                                 ]
@@ -340,7 +323,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     text: documentSnapshot['emailAdd'],
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.indigoAccent
+                                        color: Colors.white
                                     ),
                                   )
                                 ]
@@ -360,7 +343,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     text: documentSnapshot['phoneNum'].toString(),
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.indigoAccent
+                                        color: Colors.white
                                     ),
                                   )
                                 ]
@@ -380,7 +363,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     text: documentSnapshot['address'],
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.indigoAccent
+                                        color: Colors.white
                                     ),
                                   )
                                 ]
@@ -392,6 +375,61 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
 
 
+                  );
+                });
+          }else{
+            return const CircularProgressIndicator();
+          }
+        });
+  }
+
+  buildBMIStreamBuilder(){
+    return StreamBuilder(
+        stream: bmiHistory.snapshots(),
+        builder: (context,AsyncSnapshot<QuerySnapshot>streamSnapshot){
+          if(streamSnapshot.hasData){
+            return ListView.builder(
+                padding: const EdgeInsets.all(10),
+                itemCount: streamSnapshot.data!.docs.length,
+                itemBuilder: (context,index){
+                  final DocumentSnapshot documentSnapshot = streamSnapshot.data!.docs[index];
+                  return Dismissible(
+                    key: UniqueKey(),
+                    background: Container(color: Colors.red),
+                    onDismissed: (DismissDirection direction) {
+                      setState(() {
+                        deleteData(documentSnapshot.id);
+                        // dbProvider!.deleteBMI(documentSnapshot['id']);
+                        // dataList = dbProvider!.getBMIList();
+                        // snapshot.data!.remove(snapshot.data![index]);
+                      });
+                    },
+                    child: Card(
+                      elevation: 10,
+                      shape: RoundedRectangleBorder(
+                          side: const BorderSide(color: Colors.white70, width: 1),
+                          borderRadius: BorderRadius.circular(10)),
+                      child: ExpansionTile(
+                        title: Text(documentSnapshot['weightClass']),
+                        subtitle: Text('Result: ${documentSnapshot['result']}'),
+                        backgroundColor: const Color(0xFFF8EDE3),
+                        children: [
+                          Container(
+                            color: const Color(0xFF85586F),
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 5),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Height: ${documentSnapshot['height']}",style: const TextStyle(color: Colors.white)),
+                                Text("Weight: ${documentSnapshot['weight']}",style: const TextStyle(color: Colors.white)),
+                                Text("Age: ${documentSnapshot['age']}",style: const TextStyle(color: Colors.white))
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
                   );
                 });
           }else{
@@ -429,7 +467,7 @@ class _ProfilePageState extends State<ProfilePage> {
               height: 70,
               child: ElevatedButton(
                   onPressed: ()async{
-                   receiver = await Navigator.push(
+                    receiver = await Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => ProForm(docU: docToEdit,)
@@ -444,7 +482,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue),
+                      backgroundColor: Colors.brown),
                   child: const Text("Edit Profile",
                       style: TextStyle(color: Colors.white)
                   )
@@ -461,7 +499,7 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 alignment: Alignment.topLeft,
-                height: 412,
+                height: 365,
                 color: const Color(0xFF967E76),
                 child: isLoading
                     ? const CircularProgressIndicator()
@@ -477,25 +515,12 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               child: Container(
                   alignment: Alignment.center,
-                  height: 100,
+                  height: 300,
+                  //height: MediaQuery.of(context).size.height,
                   color: const Color(0xFF967E76),
-                  child: ElevatedButton(
-                    onPressed: (){
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const BmiCollection()
-                          )
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.brown
-                    ),
-                    child: const Text(
-                        'BMI Collection',
-                        style: TextStyle(color: Colors.white)
-                    ),
-                  ),
+                  child: isLoading
+                      ? const CircularProgressIndicator()
+                      : buildBMIStreamBuilder()
               )
           ),
         ],

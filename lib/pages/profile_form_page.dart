@@ -1,10 +1,11 @@
-// ignore_for_file: prefer_typing_uninitialized_variables
+// ignore_for_file: prefer_typing_uninitialized_variables, use_build_context_synchronously
 
 //NOTE: USE THIS PAGE CODE FOR THE 2ND OPTION ONLY
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_bmi/model/profile_model.dart';
 import 'package:final_bmi/provider/db_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ProForm extends StatefulWidget {
   DocumentSnapshot docU;
@@ -18,7 +19,7 @@ class _ProFormState extends State<ProForm> {
   final CollectionReference profile = FirebaseFirestore.instance.collection('profile');
   DBProvider? dbProvider;
   final formKey = GlobalKey<FormState>();
-
+  // late DateTime dt;
   final fullName = TextEditingController();
   final age = TextEditingController();
   final birthdate = TextEditingController();
@@ -26,6 +27,7 @@ class _ProFormState extends State<ProForm> {
   final phoneNum = TextEditingController();
   final address = TextEditingController();
   var gender, sender;
+  bool update = false;
 
 
   @override
@@ -34,6 +36,20 @@ class _ProFormState extends State<ProForm> {
     super.initState();
   }
 
+  // Future<void> selectDate(BuildContext context) async {
+  //   final DateTime? picked = await showDatePicker(
+  //       context: context,
+  //       initialDate: selectedDate,
+  //       firstDate: DateTime(1960, 8),
+  //       lastDate: DateTime(2101));
+  //   if (picked != null && picked != selectedDate) {
+  //     setState(() {
+  //       selectedDate = picked;
+  //       update = true;
+  //     });
+  //   }
+  // }
+
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +57,6 @@ class _ProFormState extends State<ProForm> {
     if (newDoc != null){
       fullName.text = newDoc['fullName'];
       age.text = newDoc['age'].toString();
-      birthdate.text = newDoc['birthdate'];
       email.text = newDoc['emailAdd'];
       phoneNum.text = newDoc['phoneNum'].toString();
       address.text = newDoc['address'];
@@ -64,7 +79,7 @@ class _ProFormState extends State<ProForm> {
         children: [
           Container(
             alignment: Alignment.center,
-            height: 550,
+            height: 500,
             //color: Colors.green,
             child: Form(
               autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -113,20 +128,38 @@ class _ProFormState extends State<ProForm> {
                     },
                   ),
                   const SizedBox(height: 7),
-                  TextFormField(
-                    controller: birthdate,
-                    keyboardType: TextInputType.datetime,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: "BirthDate:",
-                    ),
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return "Please Enter BirthDate";
-                      }
-                      return null;
-                    },
-                  ),
+                  // ListTile(
+                  //   title: Text(birthdate.text),
+                  //   subtitle: const Text("Birthdate"),
+                  //   shape: RoundedRectangleBorder(
+                  //     side: const BorderSide(color: Colors.grey, width: 1),
+                  //     borderRadius: BorderRadius.circular(5),
+                  //   ),
+                  //   trailing: IconButton(
+                  //       onPressed: (){
+                  //         selectDate(context);
+                  //       },
+                  //       icon: const Icon(Icons.calendar_month)),
+                  // ),
+                  // TextFormField(
+                  //   controller: birthdate,
+                  //   keyboardType: TextInputType.datetime,
+                  //   decoration: InputDecoration(
+                  //     border: OutlineInputBorder(),
+                  //     labelText: "BirthDate:",
+                  //     suffixIcon: IconButton(
+                  //         onPressed: (){
+                  //           selectDate(context);
+                  //         },
+                  //         icon: const Icon(Icons.calendar_month))
+                  //   ),
+                  //   validator: (value) {
+                  //     if (value!.isEmpty) {
+                  //       return "Please Enter BirthDate";
+                  //     }
+                  //     return null;
+                  //   },
+                  // ),
                   const SizedBox(height: 7),
                   DropdownButtonFormField(
                       value: gender,
@@ -207,8 +240,6 @@ class _ProFormState extends State<ProForm> {
             child: ElevatedButton(
               onPressed: () async {
                 if (formKey.currentState!.validate()) {
-
-
                   await profile.doc(newDoc.id).update({
                     "fullName": fullName.text,
                     "age": int.parse(age.text),
@@ -222,7 +253,7 @@ class _ProFormState extends State<ProForm> {
                   await dbProvider!.insertProfile(Profile(
                       fullName: fullName.text,
                       age: int.parse(age.text),
-                      birthdate: birthdate.text,
+                      // birthdate: birthdate.text,
                       gender: gender,
                       email: email.text,
                       phoneNum: phoneNum.text,
@@ -231,7 +262,7 @@ class _ProFormState extends State<ProForm> {
 
                   sender = await Profile(fullName: fullName.text,
                       age: int.parse(age.text),
-                      birthdate: birthdate.text,
+                      // birthdate: birthdate.text,
                       gender: gender,
                       email: email.text,
                       phoneNum: phoneNum.text,
@@ -243,7 +274,7 @@ class _ProFormState extends State<ProForm> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue),
+                  backgroundColor: Colors.brown),
               child: const Text(
                   "Save Changes",
                   style: TextStyle(color: Colors.white)
