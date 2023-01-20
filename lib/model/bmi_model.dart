@@ -25,6 +25,7 @@ class BmiModel {
   String? weightClass;
   double? result;
 
+
   factory BmiModel.fromJson(Map<String, dynamic> json) => BmiModel(
     id: json["id"],
     height: json["height"].toDouble(),
