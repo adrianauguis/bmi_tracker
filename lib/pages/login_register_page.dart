@@ -1,6 +1,10 @@
+import 'package:final_bmi/pages/reg_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../auth.dart';
+import '../deco/header.dart';
+import '../deco/themehelper.dart';
+import 'home_page.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -11,6 +15,9 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
+  bool checkedValue = false;
+  bool checkboxValue = false;
 
   String? errorMessage = '';
   bool isLogin = true;
@@ -26,19 +33,6 @@ class _LoginPageState extends State<LoginPage> {
       );
       print(_controllerEmail.text);
     } on FirebaseAuthException catch (e){
-      setState(() {
-        errorMessage = e.message;
-      });
-    }
-  }
-
-  Future<void> createUserWithEmailAndPassword() async{
-    try {
-      await Auth().createUserWithEmailAndPassword(
-          email: _controllerEmail.text,
-          password: _controllerPassword.text
-      );
-    } on FirebaseAuthException catch (e) {
       setState(() {
         errorMessage = e.message;
       });
@@ -65,22 +59,36 @@ class _LoginPageState extends State<LoginPage> {
     return Text (errorMessage == '' ? '' : "Hmmmmm? $errorMessage");
   }
 
-  Widget _submitButton(){
-    return ElevatedButton(
-        onPressed: isLogin? signInWithEmailAndPassword : createUserWithEmailAndPassword,
-        child: Text(isLogin ? 'Login' : 'Register')
+  Widget _submitButton(BuildContext context){
+    return Container(
+      decoration: ThemeHelper().buttonBoxDecoration(context),
+      child: ElevatedButton(
+          style: ThemeHelper().buttonStyle(),
+          onPressed: (){
+            if (_formKey.currentState!.validate()) {
+              signInWithEmailAndPassword();
+            }
+          },
+          child: Text('Login'.toUpperCase(),
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          )
+      ),
+    )
     );
   }
-
 
   Widget _loginOrRegisterButton(){
     return TextButton(
         onPressed: (){
           setState(() {
-            isLogin = !isLogin;
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const RegistrationPage()));
           });
         },
-        child: Text(isLogin ? "Register Instead " : "Login Instead")
+        child: const Text("Register Instead")
     );
   }
   Widget _optionMessage(){
@@ -105,53 +113,79 @@ class _LoginPageState extends State<LoginPage> {
       );
   }
 
-  Widget _logoImage(){
-    return SizedBox(
-      height: 250,
-      width: 300,
-      child: InkWell(
-        child: Container(
-          child: const Image(
-            image: AssetImage("assets/splash logo.png"),
-          ),
-        ),
-        onTap: (){
-          Auth().signInWithGoogle();
-        },
-
-      ),
-    );
-  }
-
   @override
-
-
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF00FFDE),
-      body: ListView(
+      body: SingleChildScrollView(
+        child: Stack(
           children: [
-                SizedBox(
-                  child:
-                    Center(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          _logoImage(),
-                          _entryField('Email', _controllerEmail),
-                          _entryField('Password', _controllerPassword),
-                          _errorMessage(),
-                          _submitButton(),
-                          _loginOrRegisterButton(),
-                          _optionMessage(),
-                          _googleImage(),
-                        ]
+            Container(
+              height: 150,
+              child: const HeaderWidget(150, false, Icons.person_add_alt_1_rounded),
+            ),
+            Container(
+              margin: const EdgeInsets.fromLTRB(25, 50, 25, 10),
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+              alignment: Alignment.center,
+              child: Column(
+                children: [
+                  Form(
+                    key:_formKey,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 30,),
+                        const SizedBox(height: 30,),
+                        const SizedBox(height: 30,),
+                        SizedBox(
+                          height: 300,
+                          width: 300,
+                          child: InkWell(
+                            child: Container(
+                              child: const Image(
+                                image: AssetImage("assets/splash logo.png"),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 30,),
+                        Container(
+                          decoration: ThemeHelper().inputBoxDecorationShaddow(),
+                          child: TextFormField(
+                          controller: _controllerEmail,
+                          decoration: ThemeHelper().textInputDecoration('Email', 'Enter your first name'),
+                          validator: (val) {
+                            if(!(val!.isEmpty) && !RegExp(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$").hasMatch(val)){
+                              return "Enter a valid email address";
+                            }
+                            return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 30,),
+                        Container(
+                          decoration: ThemeHelper().inputBoxDecorationShaddow(),
+                          child: TextFormField(
+                            controller: _controllerPassword,
+                            decoration: ThemeHelper().textInputDecoration('Password', 'Enter your password'),
+                          ),
+                        ),
+                        const SizedBox(height: 20,),
+                        _errorMessage(),
+                        _submitButton(context),
+                        _loginOrRegisterButton(),
+                        _optionMessage(),
+                        _googleImage(),
+                      ],
                     ),
-                    ),
-                ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
+
+      ),
     );
   }
 }
