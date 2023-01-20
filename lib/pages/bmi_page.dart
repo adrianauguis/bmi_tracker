@@ -13,6 +13,7 @@ class BMIPage extends StatefulWidget {
 
 class _BMIPageState extends State<BMIPage> {
   DBProvider? dbProvider;
+  DateTime dateNow = DateTime.now();
 
   var height = TextEditingController();
   var weight = TextEditingController();
@@ -203,6 +204,7 @@ class _BMIPageState extends State<BMIPage> {
                             result: formattedResult.toDouble(),
                             age: 21,
                             weightClass: label,
+                            bmiDate: dateNow
                           ));
 
                           dbProvider!.insertBMI(BmiModel(

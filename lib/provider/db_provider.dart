@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_bmi/model/bmi_model.dart';
+import 'package:final_bmi/model/profile_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -30,12 +31,22 @@ class DBProvider {
         "CREATE TABLE bmiHistory(id INTEGER PRIMARY KEY AUTOINCREMENT, "
         "height DOUBLE NOT NULL, weight DOUBLE NOT NULL, age INTEGER NOT NULL,"
             "weightClass TEXT NOT NULL, result DOUBLE NOT NULL);");
+
+    await database.execute("CREATE TABLE profile(id INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "fullName TEXT NOT NULL, birthdate TEXT NOT NULL, age INTEGER NOT NULL,"
+        "gender TEXT NOT NULL, email TEXT NOT NULL, phoneNum TEXT NOT NULL, address TEXT NOT NULL);");
   }
 
-  Future<BmiModel> insertBMI(BmiModel BmiModel) async {
+  Future<BmiModel> insertBMI(BmiModel bmiModel) async {
     var dbClient = await database;
-    await dbClient?.insert('bmiHistory', BmiModel.toJson());
-    return BmiModel;
+    await dbClient!.insert('bmiHistory', bmiModel.toJson());
+    return bmiModel;
+  }
+
+  Future<Profile> insertProfile(Profile profile)async{
+    var dbClient = await database;
+    await dbClient!.insert('profile', profile.toJson());
+    return profile;
   }
 
   Future<BmiModel> createData(BmiModel bmiModel)async{
@@ -43,6 +54,14 @@ class DBProvider {
 
     await dbClient.set(bmiModel.toJson());
     return bmiModel;
+  }
+
+  Future<List<Profile>> getProfileList()async{
+    var dbClient = await database;
+    List<Map<String, Object?>> queryResult =
+    await dbClient!.rawQuery('SELECT * FROM profile');
+
+    return queryResult.map((e) => Profile.fromJson(e)).toList();
   }
 
   Future<List<BmiModel>> getBMIList() async {
@@ -65,9 +84,9 @@ class DBProvider {
     databaseFactory.deleteDatabase(path);
   }
 
-  Future<int> updateBMI(BmiModel BmiModel) async {
-    var dbClient = await database;
-    return await dbClient!.update('bmiHistory', BmiModel.toJson(),
-        where: 'id = ?', whereArgs: [BmiModel.id]);
-  }
+  // Future<int> updateBMI(BmiModel BmiModel) async {
+  //   var dbClient = await database;
+  //   return await dbClient!.update('bmiHistory', BmiModel.toJson(),
+  //       where: 'id = ?', whereArgs: [BmiModel.id]);
+  // }
 }

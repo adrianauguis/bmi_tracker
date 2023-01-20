@@ -14,6 +14,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final CollectionReference bmiHistory = FirebaseFirestore.instance.collection('bmiHistory');
   DBProvider? dbProvider;
   late Future<List<BmiModel>> dataList;
   int _selectedIndex = 0;
@@ -26,105 +27,66 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
-  Widget buildData(BmiModel bmiModel) => ListTile(
-    title: Text(bmiModel.weightClass.toString()),
-    subtitle: Text(bmiModel.result.toString()),
-  );
-
-  buildBMIListView() {
-    dataList = dbProvider!.getBMIList();
-    return Column(
-      children: [
-        Expanded(
-            child: FutureBuilder(
-                future: dataList,
-                builder: (context, AsyncSnapshot<List<BmiModel>> snapshot) {
-                  if (!snapshot.hasData || snapshot.data == null) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (snapshot.data!.length == 0) {
-                    return const Center(
-                      child: Text('No History'),
-                    );
-                  } else {
-                    return ListView.builder(
-                        padding: const EdgeInsets.all(10),
-                        shrinkWrap: true,
-                        itemCount: snapshot.data?.length,
-                        itemBuilder: (context, index) {
-                          int bmiId = snapshot.data![index].id!.toInt();
-                          String bmiWeightclass =
-                          snapshot.data![index].weightClass!;
-                          double? height =
-                          snapshot.data![index].height!;
-                          double? weight =
-                          snapshot.data![index].weight!;
-                          double? result =
-                          snapshot.data![index].result!;
-                          return Dismissible(
-                            key: UniqueKey(),
-                            background: Container(color: Colors.red),
-                            onDismissed: (DismissDirection direction) {
-                              setState(() {
-                                dbProvider!.deleteBMI(bmiId);
-                                dataList = dbProvider!.getBMIList();
-                                snapshot.data!.remove(snapshot.data![index]);
-                              });
-                            },
-                            child: Card(
-                              elevation: 10,
-                              shape: RoundedRectangleBorder(
-                                  side: const BorderSide(color: Colors.white70, width: 1),
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: ExpansionTile(
-                                title: Text("$bmiWeightclass"),
-                                subtitle: Text('ID: $bmiId'),
-                                backgroundColor: Color(0xFFF8EDE3),
-                                children: [
-                                  Container(
-                                    color: Color(0xFF85586F),
-                                    alignment: Alignment.centerLeft,
-                                    padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 5),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text("Height: $height",style: const TextStyle(color: Colors.white)),
-                                        Text("Weight: $weight",style: const TextStyle(color: Colors.white)),
-                                        Text("BMI Result: $result",style: const TextStyle(color: Colors.white))
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          );
-                        });
-                  }
-                })
-            // StreamBuilder<List<BmiModel>>(
-            //     stream: readData(),
-            //     builder: (context, snapshot){
-            //       if (snapshot.hasError){
-            //         return const Text("Something went wrong");
-            //
-            //       }else if(snapshot.hasData){
-            //         final bmi = snapshot.data!;
-            //
-            //         return ListView(
-            //           children: bmi.map(buildData).toList(),
-            //         );
-            //       }else{
-            //         return const CircularProgressIndicator();
-            //       }
-            //     })
-        ),
-      ],
-    );
+  Future <void> deleteData(String productId)async{
+    await bmiHistory.doc(productId).delete();
   }
 
-  Stream<List<BmiModel>> readData() => FirebaseFirestore.instance.collection('bmiHistory')
-      .snapshots().map((snapshot) => snapshot.docs.map((doc) => BmiModel.fromJson(doc.data())).toList());
+
+  // buildBMIStreamBuilder(){
+  //   return StreamBuilder(
+  //       stream: bmiHistory.snapshots(),
+  //       builder: (context,AsyncSnapshot<QuerySnapshot>streamSnapshot){
+  //         if(streamSnapshot.hasData){
+  //           return ListView.builder(
+  //               padding: const EdgeInsets.all(10),
+  //               itemCount: streamSnapshot.data!.docs.length,
+  //               itemBuilder: (context,index){
+  //                 final DocumentSnapshot documentSnapshot = streamSnapshot.data!.docs[index];
+  //                 return Dismissible(
+  //                   key: UniqueKey(),
+  //                   background: Container(color: Colors.red),
+  //                   onDismissed: (DismissDirection direction) {
+  //                     setState(() {
+  //                       deleteData(documentSnapshot.id);
+  //                       // dbProvider!.deleteBMI(documentSnapshot['id']);
+  //                       // dataList = dbProvider!.getBMIList();
+  //                       // snapshot.data!.remove(snapshot.data![index]);
+  //                     });
+  //                   },
+  //                   child: Card(
+  //                     elevation: 10,
+  //                     shape: RoundedRectangleBorder(
+  //                         side: const BorderSide(color: Colors.white70, width: 1),
+  //                         borderRadius: BorderRadius.circular(10)),
+  //                     child: ExpansionTile(
+  //                       title: Text(documentSnapshot['weightClass']),
+  //                       subtitle: Text('Result: ${documentSnapshot['result']}'),
+  //                       backgroundColor: Color(0xFFF8EDE3),
+  //                       children: [
+  //                         Container(
+  //                           color: Color(0xFF85586F),
+  //                           alignment: Alignment.centerLeft,
+  //                           padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 5),
+  //                           child: Column(
+  //                             crossAxisAlignment: CrossAxisAlignment.start,
+  //                             children: [
+  //                               Text("Height: ${documentSnapshot['height']}",style: const TextStyle(color: Colors.white)),
+  //                               Text("Weight: ${documentSnapshot['weight']}",style: const TextStyle(color: Colors.white)),
+  //                               Text("Age: ${documentSnapshot['age']}",style: const TextStyle(color: Colors.white))
+  //                             ],
+  //                           ),
+  //                         )
+  //                       ],
+  //                     ),
+  //                   ),
+  //                 );
+  //               });
+  //         }else{
+  //           return const CircularProgressIndicator();
+  //         }
+  //       });
+  // }
+
 
   @override
   Widget build(BuildContext context) {
@@ -138,9 +100,9 @@ class _HomePageState extends State<HomePage> {
           IconButton(onPressed: () {}, icon: const Icon(Icons.menu)),
         ],
       ),
-      body: isloading? const Center(
-        child: Text("Wapay sulod diri ang history"),
-      ) : buildBMIListView(),
+      body: const Center(
+        child: CircularProgressIndicator(),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.grey,
         currentIndex: _selectedIndex,
