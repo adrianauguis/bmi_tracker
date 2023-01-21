@@ -1,13 +1,16 @@
 // ignore_for_file: prefer_typing_uninitialized_variables
 
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:final_bmi/model/storage_service.dart';
 import 'package:final_bmi/pages/profile_form_page.dart';
 import 'package:final_bmi/pages/bmi_page.dart';
 import 'package:final_bmi/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-
+import 'package:flutter/services.dart';
 import '../auth.dart';
 import '../model/profile_model.dart';
 import '../provider/db_provider.dart';
@@ -28,6 +31,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final CollectionReference profile =
       FirebaseFirestore.instance.collection('profile');
   final CollectionReference bmiHistory =
@@ -38,6 +42,7 @@ class _ProfilePageState extends State<ProfilePage> {
   List<Profile> datas = [];
   var receiver;
   var isLoading = false;
+  final Storage storage = Storage();
 
   setDoc(DocumentSnapshot documentSnapshot) {
     docToEdit = documentSnapshot;
@@ -56,17 +61,18 @@ class _ProfilePageState extends State<ProfilePage> {
     Navigator.pop(context);
   }
 
-  buildProfileStreamBuilder() {
-    return StreamBuilder(
-        stream: profile.snapshots(),
-        builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
-          if (streamSnapshot.hasData) {
+  buildProfileFutureBuilder(){
+    FutureBuilder(
+        future: storage.getUserFromDB(_firebaseAuth.currentUser!.uid.toString()),
+        builder: (context, AsyncSnapshot<dynamic> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done &&
+              snapshot.hasData) {
             return ListView.builder(
                 padding: const EdgeInsets.all(10),
-                itemCount: streamSnapshot.data!.docs.length,
+                itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
                   DocumentSnapshot documentSnapshot =
-                      streamSnapshot.data!.docs[index];
+                  snapshot.data!.docs[index];
                   setDoc(documentSnapshot);
                   return Column(
                     children: [
@@ -75,13 +81,13 @@ class _ProfilePageState extends State<ProfilePage> {
                         leading: const Icon(Icons.perm_identity),
                         title: Text.rich(
                             TextSpan(text: 'Full Name: ', children: <TextSpan>[
-                          TextSpan(
-                            text: documentSnapshot['fullName'],
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          )
-                        ])),
+                              TextSpan(
+                                text: documentSnapshot['fullName'],
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              )
+                            ])),
                       ),
 
                       // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
@@ -90,26 +96,26 @@ class _ProfilePageState extends State<ProfilePage> {
                         leading: const Icon(Icons.onetwothree_outlined),
                         title: Text.rich(
                             TextSpan(text: 'Age: ', children: <TextSpan>[
-                          TextSpan(
-                            text: documentSnapshot['age'].toString(),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          )
-                        ])),
+                              TextSpan(
+                                text: documentSnapshot['age'].toString(),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              )
+                            ])),
                       ),
 
                       ListTile(
                         leading: const Icon(Icons.people_alt_outlined),
                         title: Text.rich(
                             TextSpan(text: 'Gender: ', children: <TextSpan>[
-                          TextSpan(
-                            text: documentSnapshot['gender'],
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          )
-                        ])),
+                              TextSpan(
+                                text: documentSnapshot['gender'],
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              )
+                            ])),
                       ),
 
                       // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
@@ -130,44 +136,160 @@ class _ProfilePageState extends State<ProfilePage> {
 
                       // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
 
-                      ListTile(
-                        leading: const Icon(Icons.phone),
-                        title: Text.rich(TextSpan(
-                            text: 'Phone Number: ',
-                            children: <TextSpan>[
-                              TextSpan(
-                                text: documentSnapshot['phoneNum'].toString(),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                              )
-                            ])),
-                      ),
+                      // ListTile(
+                      //   leading: const Icon(Icons.phone),
+                      //   title: Text.rich(TextSpan(
+                      //       text: 'Phone Number: ',
+                      //       children: <TextSpan>[
+                      //         TextSpan(
+                      //           text: documentSnapshot['phoneNum'].toString(),
+                      //           style: const TextStyle(
+                      //               fontWeight: FontWeight.bold,
+                      //               color: Colors.white),
+                      //         )
+                      //       ])),
+                      // ),
 
                       // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
 
-                      ListTile(
-                        leading: const Icon(Icons.pin_drop_outlined),
-                        title: Text.rich(
-                            TextSpan(text: 'Address: ', children: <TextSpan>[
-                          TextSpan(
-                            text: documentSnapshot['address'],
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          )
-                        ])),
-                      ),
+                      // ListTile(
+                      //   leading: const Icon(Icons.pin_drop_outlined),
+                      //   title: Text.rich(
+                      //       TextSpan(text: 'Address: ', children: <TextSpan>[
+                      //         TextSpan(
+                      //           text: documentSnapshot['address'],
+                      //           style: const TextStyle(
+                      //               fontWeight: FontWeight.bold,
+                      //               color: Colors.white),
+                      //         )
+                      //       ])),
+                      // ),
 
                       // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
                     ],
                   );
                 });
-          } else {
+          }
+          if (snapshot.connectionState == ConnectionState.waiting ||
+              !snapshot.hasData) {
             return const CircularProgressIndicator();
           }
+          return Container();
         });
   }
+
+  // buildProfileStreamBuilder() {
+  //   return StreamBuilder(
+  //       stream: profile,
+  //       builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
+  //         if (streamSnapshot.hasData) {
+  //           return ListView.builder(
+  //               padding: const EdgeInsets.all(10),
+  //               itemCount: streamSnapshot.data!.docs.length,
+  //               itemBuilder: (context, index) {
+  //                 DocumentSnapshot documentSnapshot =
+  //                     streamSnapshot.data!.docs[index];
+  //                 setDoc(documentSnapshot);
+  //                 return Column(
+  //                   children: [
+  //                     // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+  //                     ListTile(
+  //                       leading: const Icon(Icons.perm_identity),
+  //                       title: Text.rich(
+  //                           TextSpan(text: 'Full Name: ', children: <TextSpan>[
+  //                         TextSpan(
+  //                           text: documentSnapshot['fullName'],
+  //                           style: const TextStyle(
+  //                               fontWeight: FontWeight.bold,
+  //                               color: Colors.white),
+  //                         )
+  //                       ])),
+  //                     ),
+  //
+  //                     // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+  //
+  //                     ListTile(
+  //                       leading: const Icon(Icons.onetwothree_outlined),
+  //                       title: Text.rich(
+  //                           TextSpan(text: 'Age: ', children: <TextSpan>[
+  //                         TextSpan(
+  //                           text: documentSnapshot['age'].toString(),
+  //                           style: const TextStyle(
+  //                               fontWeight: FontWeight.bold,
+  //                               color: Colors.white),
+  //                         )
+  //                       ])),
+  //                     ),
+  //
+  //                     ListTile(
+  //                       leading: const Icon(Icons.people_alt_outlined),
+  //                       title: Text.rich(
+  //                           TextSpan(text: 'Gender: ', children: <TextSpan>[
+  //                         TextSpan(
+  //                           text: documentSnapshot['gender'],
+  //                           style: const TextStyle(
+  //                               fontWeight: FontWeight.bold,
+  //                               color: Colors.white),
+  //                         )
+  //                       ])),
+  //                     ),
+  //
+  //                     // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+  //
+  //                     ListTile(
+  //                       leading: const Icon(Icons.email_outlined),
+  //                       title: Text.rich(TextSpan(
+  //                           text: 'Email Address: ',
+  //                           children: <TextSpan>[
+  //                             TextSpan(
+  //                               text: documentSnapshot['emailAdd'],
+  //                               style: const TextStyle(
+  //                                   fontWeight: FontWeight.bold,
+  //                                   color: Colors.white),
+  //                             )
+  //                           ])),
+  //                     ),
+  //
+  //                     // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+  //
+  //                     ListTile(
+  //                       leading: const Icon(Icons.phone),
+  //                       title: Text.rich(TextSpan(
+  //                           text: 'Phone Number: ',
+  //                           children: <TextSpan>[
+  //                             TextSpan(
+  //                               text: documentSnapshot['phoneNum'].toString(),
+  //                               style: const TextStyle(
+  //                                   fontWeight: FontWeight.bold,
+  //                                   color: Colors.white),
+  //                             )
+  //                           ])),
+  //                     ),
+  //
+  //                     // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+  //
+  //                     ListTile(
+  //                       leading: const Icon(Icons.pin_drop_outlined),
+  //                       title: Text.rich(
+  //                           TextSpan(text: 'Address: ', children: <TextSpan>[
+  //                         TextSpan(
+  //                           text: documentSnapshot['address'],
+  //                           style: const TextStyle(
+  //                               fontWeight: FontWeight.bold,
+  //                               color: Colors.white),
+  //                         )
+  //                       ])),
+  //                     ),
+  //
+  //                     // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
+  //                   ],
+  //                 );
+  //               });
+  //         } else {
+  //           return const CircularProgressIndicator();
+  //         }
+  //       });
+  // }
 
   buildBMIStreamBuilder() {
     return StreamBuilder(
@@ -245,39 +367,72 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.symmetric(horizontal: 35),
         children: [
           const SizedBox(height: 36),
-          Container(
-            alignment: Alignment.center,
-            height: 120,
-            child: const CircleAvatar(
-              radius: 60,
-              backgroundImage:
-                  NetworkImage('https://www.thefarmersdog.com/digest'
-                      '/wp-content/uploads/2021/12/corgi-top-1400x871.jpg'),
-            ),
-          ),
-          Container(
-              alignment: Alignment.center,
-              height: 70,
-              child: ElevatedButton(
-                  onPressed: () async {
-                    receiver = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ProForm(
-                                  docU: docToEdit,
-                                )));
-                    if (receiver != null) {
-                      setState(() {
-                        datas.add(receiver);
-                      });
-                    } else {
-                      return;
-                    }
-                  },
-                  style:
-                      ElevatedButton.styleFrom(backgroundColor: Colors.brown),
-                  child: const Text("Edit Profile",
-                      style: TextStyle(color: Colors.white)))),
+          FutureBuilder(
+              future: storage.getPic('pfp.jpg'),
+              builder: (context, AsyncSnapshot<String> snapshot) {
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasData) {
+                  return Column(
+                    children: [
+                      Container(
+                          alignment: Alignment.center,
+                          height: 120,
+                          child: CircleAvatar(
+                            radius: 60,
+                            backgroundImage:
+                            NetworkImage(snapshot.data!),
+                          ),),
+                      ElevatedButton(
+                          onPressed: () async {
+                            final result = await FilePicker.platform.pickFiles(
+                                allowMultiple: false,
+                                type: FileType.custom,
+                                allowedExtensions: ['png','jpg','jpeg']
+                            );
+
+                            if (result == null){
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                  content: Text("No Image Selected")));
+                              return;
+                            }
+                            final filePath = result.files.single.path!;
+                            final fileName = result.files.single.name;
+                            storage.uploadFile(filePath, fileName);
+
+                          },
+                          style:
+                          ElevatedButton.styleFrom(backgroundColor: Colors.brown),
+                          child: const Text("Change Profile",
+                              style: TextStyle(color: Colors.white))),
+                    ],
+                  );
+                }
+                if (snapshot.connectionState == ConnectionState.waiting ||
+                    !snapshot.hasData) {
+                  return const CircularProgressIndicator();
+                }
+                return Container();
+              }),
+          ElevatedButton(
+              onPressed: () async {
+                receiver = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ProForm(
+                              docU: docToEdit,
+                            )));
+                if (receiver != null) {
+                  setState(() {
+                    datas.add(receiver);
+                  });
+                } else {
+                  return;
+                }
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.brown),
+              child: const Text("Edit Profile",
+                  style: TextStyle(color: Colors.white))),
+          const SizedBox(width: 7),
           Card(
               elevation: 20,
               shape: RoundedRectangleBorder(
@@ -291,11 +446,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   color: const Color(0xFF967E76),
                   child: isLoading
                       ? const CircularProgressIndicator()
-                      : buildProfileStreamBuilder())),
+                      : buildProfileFutureBuilder())),
           const SizedBox(height: 10),
           const SizedBox(
             height: 40,
-            child: Text("BMI Collection", style: TextStyle(fontSize: 40,fontWeight: FontWeight.bold)),
+            child: Text("BMI Collection",
+                style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
           ),
           Card(
               elevation: 10,
@@ -324,7 +480,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   //height: MediaQuery.of(context).size.height,
                   color: const Color(0xFF967E76),
                   child: ElevatedButton(
-                      onPressed: (){
+                      onPressed: () {
                         signOut();
                       },
                       child: const Text("Sign out"))))

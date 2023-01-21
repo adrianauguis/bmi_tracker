@@ -31,7 +31,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
     try {
       await Auth().createUserWithEmailAndPassword(
           email: _controllerEmail.text,
-          password: _controllerPassword.text
+          password: _controllerPassword.text,
+          age: int.parse(_controllerAge.text),
+          fullName: _controllerName.text,
+          gender: gender
       );
     } on FirebaseAuthException catch (e) {
       setState(() {

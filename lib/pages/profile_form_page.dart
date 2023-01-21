@@ -2,10 +2,13 @@
 
 //NOTE: USE THIS PAGE CODE FOR THE 2ND OPTION ONLY
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:final_bmi/model/profile_model.dart';
+import 'package:final_bmi/auth.dart';
 import 'package:final_bmi/provider/db_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/services.dart';
+
+import '../model/storage_service.dart';
 
 class ProForm extends StatefulWidget {
   DocumentSnapshot docU;
@@ -16,13 +19,12 @@ class ProForm extends StatefulWidget {
 }
 
 class _ProFormState extends State<ProForm> {
-  final CollectionReference profile = FirebaseFirestore.instance.collection('profile');
+  final CollectionReference profile = FirebaseFirestore.instance.collection('user');
+  final Storage storage = Storage();
   DBProvider? dbProvider;
   final formKey = GlobalKey<FormState>();
-  // late DateTime dt;
   final fullName = TextEditingController();
   final age = TextEditingController();
-  final birthdate = TextEditingController();
   final email = TextEditingController();
   final phoneNum = TextEditingController();
   final address = TextEditingController();
@@ -76,6 +78,7 @@ class _ProFormState extends State<ProForm> {
       ),
 
       body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         children: [
           Container(
             alignment: Alignment.center,
@@ -127,39 +130,6 @@ class _ProFormState extends State<ProForm> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 7),
-                  // ListTile(
-                  //   title: Text(birthdate.text),
-                  //   subtitle: const Text("Birthdate"),
-                  //   shape: RoundedRectangleBorder(
-                  //     side: const BorderSide(color: Colors.grey, width: 1),
-                  //     borderRadius: BorderRadius.circular(5),
-                  //   ),
-                  //   trailing: IconButton(
-                  //       onPressed: (){
-                  //         selectDate(context);
-                  //       },
-                  //       icon: const Icon(Icons.calendar_month)),
-                  // ),
-                  // TextFormField(
-                  //   controller: birthdate,
-                  //   keyboardType: TextInputType.datetime,
-                  //   decoration: InputDecoration(
-                  //     border: OutlineInputBorder(),
-                  //     labelText: "BirthDate:",
-                  //     suffixIcon: IconButton(
-                  //         onPressed: (){
-                  //           selectDate(context);
-                  //         },
-                  //         icon: const Icon(Icons.calendar_month))
-                  //   ),
-                  //   validator: (value) {
-                  //     if (value!.isEmpty) {
-                  //       return "Please Enter BirthDate";
-                  //     }
-                  //     return null;
-                  //   },
-                  // ),
                   const SizedBox(height: 7),
                   DropdownButtonFormField(
                       value: gender,
@@ -235,7 +205,7 @@ class _ProFormState extends State<ProForm> {
 
           Container(
             alignment: Alignment.center,
-            height: 50,
+            height: 40,
             //color: Colors.blue,
             child: ElevatedButton(
               onPressed: () async {
@@ -243,30 +213,27 @@ class _ProFormState extends State<ProForm> {
                   await profile.doc(newDoc.id).update({
                     "fullName": fullName.text,
                     "age": int.parse(age.text),
-                    "birthdate": birthdate.text,
                     "gender": gender,
                     "email": email.text,
                     "phoneNum": int.parse(phoneNum.text),
                     "address": address.text
                   });
 
-                  await dbProvider!.insertProfile(Profile(
-                      fullName: fullName.text,
-                      age: int.parse(age.text),
-                      // birthdate: birthdate.text,
-                      gender: gender,
-                      email: email.text,
-                      phoneNum: phoneNum.text,
-                      address: address.text
-                  ));
+                  // await dbProvider!.insertProfile(Profile(
+                  //     fullName: fullName.text,
+                  //     age: int.parse(age.text),
+                  //     gender: gender,
+                  //     email: email.text,
+                  //     phoneNum: phoneNum.text,
+                  //     address: address.text
+                  // ));
 
-                  sender = await Profile(fullName: fullName.text,
-                      age: int.parse(age.text),
-                      // birthdate: birthdate.text,
-                      gender: gender,
-                      email: email.text,
-                      phoneNum: phoneNum.text,
-                      address: address.text);
+                  // sender = await Profile(fullName: fullName.text,
+                  //     age: int.parse(age.text),
+                  //     gender: gender,
+                  //     email: email.text,
+                  //     phoneNum: phoneNum.text,
+                  //     address: address.text);
 
                   Navigator.pop(context,sender);
                 }else{
