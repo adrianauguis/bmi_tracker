@@ -1,10 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:final_bmi/model/bmi_model.dart';
 import 'package:final_bmi/pages/bmi_page.dart';
 import 'package:final_bmi/pages/profile_page.dart';
 import 'package:final_bmi/provider/db_provider.dart';
 import 'package:flutter/material.dart';
-
+import '../model/colors.dart';
+import '../model/note.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -14,95 +15,54 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final CollectionReference bmiHistory = FirebaseFirestore.instance.collection('bmiHistory');
+  final _formKey = GlobalKey<FormState>();
+  Note? note;
   DBProvider? dbProvider;
   late Future<List<BmiModel>> dataList;
   int _selectedIndex = 0;
   var isloading = false;
-
-
-  @override
-  void initState() {
-    dbProvider = DBProvider();
-    super.initState();
+  final _notes = <Note>[];
+  final _titleController = TextEditingController();
+  final _descController = TextEditingController();
+  final _calendarController = TextEditingController();
+  var _selectedType = '';
+  Future<DateTime> _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(2020),
+        lastDate: DateTime(2025)
+    );
+    if (picked != null) {
+      final TimeOfDay? time = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+      if(time != null) {
+        return DateTime(picked.year, picked.month, picked.day, time.hour,);
+      }
+    }
+    return DateTime.now();
   }
-
-  Future <void> deleteData(String productId)async{
-    await bmiHistory.doc(productId).delete();
-  }
-
-
-  // buildBMIStreamBuilder(){
-  //   return StreamBuilder(
-  //       stream: bmiHistory.snapshots(),
-  //       builder: (context,AsyncSnapshot<QuerySnapshot>streamSnapshot){
-  //         if(streamSnapshot.hasData){
-  //           return ListView.builder(
-  //               padding: const EdgeInsets.all(10),
-  //               itemCount: streamSnapshot.data!.docs.length,
-  //               itemBuilder: (context,index){
-  //                 final DocumentSnapshot documentSnapshot = streamSnapshot.data!.docs[index];
-  //                 return Dismissible(
-  //                   key: UniqueKey(),
-  //                   background: Container(color: Colors.red),
-  //                   onDismissed: (DismissDirection direction) {
-  //                     setState(() {
-  //                       deleteData(documentSnapshot.id);
-  //                       // dbProvider!.deleteBMI(documentSnapshot['id']);
-  //                       // dataList = dbProvider!.getBMIList();
-  //                       // snapshot.data!.remove(snapshot.data![index]);
-  //                     });
-  //                   },
-  //                   child: Card(
-  //                     elevation: 10,
-  //                     shape: RoundedRectangleBorder(
-  //                         side: const BorderSide(color: Colors.white70, width: 1),
-  //                         borderRadius: BorderRadius.circular(10)),
-  //                     child: ExpansionTile(
-  //                       title: Text(documentSnapshot['weightClass']),
-  //                       subtitle: Text('Result: ${documentSnapshot['result']}'),
-  //                       backgroundColor: Color(0xFFF8EDE3),
-  //                       children: [
-  //                         Container(
-  //                           color: Color(0xFF85586F),
-  //                           alignment: Alignment.centerLeft,
-  //                           padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 5),
-  //                           child: Column(
-  //                             crossAxisAlignment: CrossAxisAlignment.start,
-  //                             children: [
-  //                               Text("Height: ${documentSnapshot['height']}",style: const TextStyle(color: Colors.white)),
-  //                               Text("Weight: ${documentSnapshot['weight']}",style: const TextStyle(color: Colors.white)),
-  //                               Text("Age: ${documentSnapshot['age']}",style: const TextStyle(color: Colors.white))
-  //                             ],
-  //                           ),
-  //                         )
-  //                       ],
-  //                     ),
-  //                   ),
-  //                 );
-  //               });
-  //         }else{
-  //           return const CircularProgressIndicator();
-  //         }
-  //       });
-  // }
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey,
-        title: const Text("BMI Tracker",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("Planner",
+            style: TextStyle(
+                fontWeight: FontWeight.bold)),
         leading: const Icon(Icons.balance),
-        actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.menu)),
-        ],
       ),
-      body: const Center(
-        child: CircularProgressIndicator(),
-      ),
+      body: _showDietaryPlan(),
+      floatingActionButton: FloatingActionButton(
+            child: const Icon(Icons.add),
+            onPressed: (){
+              _showAddNoteDialog();
+              _titleController.clear();
+              _descController.clear();
+              _calendarController.clear();
+            },
+
+
+        ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.grey,
         currentIndex: _selectedIndex,
@@ -113,11 +73,13 @@ class _HomePageState extends State<HomePage> {
           ),
           BottomNavigationBarItem(
             icon: IconButton(
-                onPressed: (){
+                onPressed: () {
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => const BMIPage()));
-                }, icon: const Icon(Icons.balance)),
-            label: 'BMI',
+                },
+                icon: const Icon(Icons.assessment)
+            ),
+            label: 'Calculate BMI',
           ),
           BottomNavigationBarItem(
             icon: IconButton(
@@ -133,7 +95,288 @@ class _HomePageState extends State<HomePage> {
             label: 'Profile',
           ),
         ],
-      )
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+      ),
     );
   }
-}
+
+  _showDietaryPlan() {
+    return Container(
+      decoration: const BoxDecoration(// set the background color
+      ), child: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+        itemCount: _notes.length,
+        itemBuilder: (context, index) {
+          return _buildNoteCard(_notes[index], index);
+        },
+      ),
+    );
+
+  }
+
+  Widget _buildNoteCard(Note note, int index) {
+    return Card(
+      color: noteColor[(index % noteColor.length).floor()],
+      elevation: 15,
+      child: InkWell(
+        onTap: () => _showEditNoteDialog(note),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                note.type!,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                note.title!,
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
+              ),
+              const SizedBox(
+                height: 8,
+              ),
+              Text(
+                note.description!,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                note.calendarOutput.toString(),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  _showAddNoteDialog() {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Add your dietary plan"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Form(
+                key: _formKey,
+                child: Column(
+            children: [
+              DropdownButtonFormField(
+                      hint: const Text('Type (Meal/Exercise)'),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'Meal Plan',
+                          child: Text('Meal Plan'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Exercise Plan',
+                          child: Text('Exercise Plan'),
+                        ),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Pleas Select a Type";
+                        }
+                        return null;
+                      },
+                      onChanged: (gender){
+                        _selectedType = gender.toString();
+
+                      }
+                  ),
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(labelText: 'Title'),
+                validator: (value) {
+                  return (value == '') ? 'Please enter a title' : null;
+                },
+              ),
+              TextFormField(
+                controller: _descController,
+                decoration: const InputDecoration(labelText: 'Description'),
+                validator: (value) {
+                  return (value == '') ? 'Please enter a description' : null;
+                },
+              ),
+              TextFormField(
+                controller: _calendarController,
+                decoration: InputDecoration(
+                  labelText: 'Calendar',
+                  prefixIcon: InkWell(
+                    child: const Icon(Icons.calendar_today),
+                    onTap: () async {
+                      final picked = await _selectDate();
+                      _calendarController.text = picked.toString();
+                    },
+                  ),
+                ),
+                validator: (value) {
+                  return (value == '') ? 'Please enter a date and time' : null;
+                },
+              ),
+          ]
+        ),
+        ),
+        ],
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text("Cancel"),
+              onPressed: () {
+                Navigator.pop(context);
+              }
+            ),
+            ElevatedButton(
+              child: const Text("Add"),
+              onPressed: () {
+                {
+                  if (_formKey.currentState!.validate()) {
+                    var note = Note(
+                        _selectedType.toString(), _titleController.text,
+                        _descController.text, _calendarController.text);
+                    setState(() {
+                      _notes.add(note);
+                    });
+                    Navigator.pop(context);
+                  }
+                }
+              }
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void _showEditNoteDialog(Note note) {
+    _titleController.text = note.title!;
+    _descController.text = note.description!;
+    _calendarController.text = note.calendarOutput!;
+    _selectedType = note.type!;
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("Edit your dietary plan"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Form(
+                  key: _formKey,
+                  child: Column(
+                      children: [
+                        DropdownButtonFormField(
+                            value: _selectedType,
+                            items: const [
+                              DropdownMenuItem(
+                                value: 'Meal Plan',
+                                child: Text('Meal Plan'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'Exercise Plan',
+                                child: Text('Exercise Plan'),
+                              ),
+                            ],
+                            onChanged: (gender){
+                              _selectedType = gender.toString();
+
+                            }
+                        ),
+                        TextFormField(
+                          controller: _titleController,
+                          decoration: const InputDecoration(labelText: 'Title'),
+                          validator: (value) {
+                            return (value == '') ? 'Please enter a title' : null;
+                          },
+                        ),
+                        TextFormField(
+                          controller: _descController,
+                          decoration: const InputDecoration(labelText: 'Description'),
+                          validator: (value) {
+                            return (value == '') ? 'Please enter a description' : null;
+                          },
+                        ),
+                        TextFormField(
+                          controller: _calendarController,
+                          decoration: InputDecoration(
+                            labelText: 'Calendar',
+                            prefixIcon: InkWell(
+                              child: const Icon(Icons.calendar_today),
+                              onTap: () async {
+                                final picked = await _selectDate();
+                                _calendarController.text = picked.toString();
+                              },
+                            ),
+                          ),
+                        ),
+                      ]
+                  ),
+                ),
+              ],
+            ),
+            actions: <Widget>[
+              ElevatedButton(
+                  child: const Text("Cancel"),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  }
+              ),
+              ElevatedButton(
+                  child: const Text("Save"),
+                  onPressed: () {
+                    {
+                      if (_formKey.currentState!.validate()) {
+                        setState(() {
+                          note.title = _titleController.text;
+                          note.description = _descController.text;
+                          note.calendarOutput = _calendarController.text;
+                          note.type = _selectedType.toString();
+                          _titleController.clear();
+                          _descController.clear();
+                          _calendarController.clear();
+                        });
+                        Navigator.pop(context);
+                      }
+                    }
+                  }
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
