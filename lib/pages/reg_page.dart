@@ -34,12 +34,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
           password: _controllerPassword.text,
           age: int.parse(_controllerAge.text),
           fullName: _controllerName.text,
-          gender: gender
+          gender: gender,
       );
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMessage = e.message;
-
       });
     }
   }
@@ -155,22 +154,21 @@ class _RegistrationPageState extends State<RegistrationPage> {
                             ),
                         ),
                         const SizedBox(height: 20.0),
-                        Container(
-                          decoration: ThemeHelper().inputBoxDecorationShaddow(),
-                          child: TextFormField(
-                            decoration: ThemeHelper().textInputDecoration(
-                                "Mobile Number",
-                                "Enter your mobile number"),
-                            keyboardType: TextInputType.phone,
-                            validator: (val) {
-                              if(!(val!.isEmpty) && !RegExp(r"^(\d+)*$").hasMatch(val)){
-                                return "Enter a valid phone number";
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 15.0),
+                        // Container(
+                        //   decoration: ThemeHelper().inputBoxDecorationShaddow(),
+                        //   child: TextFormField(
+                        //     decoration: ThemeHelper().textInputDecoration(
+                        //         "Mobile Number",
+                        //         "Enter your mobile number"),
+                        //     keyboardType: TextInputType.phone,
+                        //     validator: (val) {
+                        //       if(!(val!.isEmpty) && !RegExp(r"^(\d+)*$").hasMatch(val)){
+                        //         return "Enter a valid phone number";
+                        //       }
+                        //       return null;
+                        //     },
+                        //   ),
+                        // ),
                         FormField<bool>(
                           builder: (state) {
                             return Column(

@@ -192,7 +192,7 @@ class _BMIPageState extends State<BMIPage> {
                             setState(() {
                               result = formattedResult;
                               color = Colors.red;
-                              label = "Obese";
+                              label = "Obese weight";
                             });
                           }else{
                             return;
@@ -201,19 +201,18 @@ class _BMIPageState extends State<BMIPage> {
                           dbProvider!.createData(BmiModel(
                             height: double.parse(height.text),
                             weight: double.parse(weight.text),
-                            result: formattedResult.toDouble(),
-                            age: 21,
+                            bmiResult: formattedResult.toDouble(),
                             weightClass: label,
                             bmiDate: dateNow
                           ));
 
-                          dbProvider!.insertBMI(BmiModel(
-                            height: double.parse(height.text),
-                            weight: double.parse(weight.text),
-                            result: formattedResult.toDouble(),
-                            age: 21,
-                            weightClass: label,
-                          ));
+                          // dbProvider!.insertBMI(BmiModel(
+                          //   height: double.parse(height.text),
+                          //   weight: double.parse(weight.text),
+                          //   result: formattedResult.toDouble(),
+                          //   age: 21,
+                          //   weightClass: label,
+                          // ));
 
                         } else {
                           return;

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_bmi/model/bmi_model.dart';
 import 'package:final_bmi/model/profile_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -8,6 +9,7 @@ import 'dart:io' as io;
 
 class DBProvider {
   static Database? _database;
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   Future<Database?> get database async {
     // If database exists, return database
@@ -52,7 +54,7 @@ class DBProvider {
   }
 
   Future<BmiModel> createData(BmiModel bmiModel) async {
-    final dbClient = FirebaseFirestore.instance.collection('bmiHistory').doc();
+    final dbClient = FirebaseFirestore.instance.collection('users').doc(_firebaseAuth.currentUser!.uid).collection('bmiHistory').doc();
 
     await dbClient.set(bmiModel.toJson());
     return bmiModel;

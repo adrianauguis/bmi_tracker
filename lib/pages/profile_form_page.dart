@@ -1,9 +1,11 @@
-// ignore_for_file: prefer_typing_uninitialized_variables, use_build_context_synchronously
+// ignore_for_file: prefer_typing_uninitialized_variables, use_build_context_synchronously, unnecessary_null_comparison
 
 //NOTE: USE THIS PAGE CODE FOR THE 2ND OPTION ONLY
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_bmi/auth.dart';
+import 'package:final_bmi/pages/profile_page.dart';
 import 'package:final_bmi/provider/db_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
@@ -19,14 +21,14 @@ class ProForm extends StatefulWidget {
 }
 
 class _ProFormState extends State<ProForm> {
-  final CollectionReference profile = FirebaseFirestore.instance.collection('user');
+  final CollectionReference profile = FirebaseFirestore.instance.collection('users');
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final Storage storage = Storage();
   DBProvider? dbProvider;
   final formKey = GlobalKey<FormState>();
   final fullName = TextEditingController();
   final age = TextEditingController();
   final email = TextEditingController();
-  final phoneNum = TextEditingController();
   final address = TextEditingController();
   var gender, sender;
   bool update = false;
@@ -38,20 +40,6 @@ class _ProFormState extends State<ProForm> {
     super.initState();
   }
 
-  // Future<void> selectDate(BuildContext context) async {
-  //   final DateTime? picked = await showDatePicker(
-  //       context: context,
-  //       initialDate: selectedDate,
-  //       firstDate: DateTime(1960, 8),
-  //       lastDate: DateTime(2101));
-  //   if (picked != null && picked != selectedDate) {
-  //     setState(() {
-  //       selectedDate = picked;
-  //       update = true;
-  //     });
-  //   }
-  // }
-
 
   @override
   Widget build(BuildContext context) {
@@ -59,12 +47,9 @@ class _ProFormState extends State<ProForm> {
     if (newDoc != null){
       fullName.text = newDoc['fullName'];
       age.text = newDoc['age'].toString();
-      email.text = newDoc['emailAdd'];
-      phoneNum.text = newDoc['phoneNum'].toString();
-      address.text = newDoc['address'];
+      email.text = newDoc['email'];
       gender = newDoc['gender'];
     }
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey,
@@ -80,9 +65,88 @@ class _ProFormState extends State<ProForm> {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         children: [
+          const SizedBox(height: 20),
+          StreamBuilder(
+              stream: storage.getPicStream('pfp'),
+              builder: (context, AsyncSnapshot<String> snapshot) {
+                if (snapshot.hasData){
+                  return Column(
+                    children: [
+                      Container(
+                          alignment: Alignment.center,
+                          height: 120,
+                          child: CircleAvatar(
+                            radius: 60,
+                            backgroundImage: NetworkImage(snapshot.data ??
+                                "https://i0.wp.com/collegecore.com/wp-content/uploads/2018/05/facebook-no-profile-picture-icon-620x389.jpg?ssl=1"),
+                          )),
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                          onPressed: () async {
+                            final result = await FilePicker.platform.pickFiles(
+                                allowMultiple: false,
+                                type: FileType.custom,
+                                allowedExtensions: ['png','jpg','jpeg']
+                            );
+
+                            if (result == null){
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                  content: Text("No Image Selected")));
+                              return;
+                            }
+                            final filePath = result.files.single.path!;
+                            const fileName = "pfp";
+                            storage.uploadFile(filePath, fileName);
+                          },
+                          style:
+                          ElevatedButton.styleFrom(backgroundColor: Colors.brown),
+                          child: const Text("Change Profile",
+                              style: TextStyle(color: Colors.white))),
+                    ],
+                  );
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                {
+                  return Column(
+                    children: [
+                      Container(
+                          alignment: Alignment.center,
+                          height: 120,
+                          child: const CircleAvatar(
+                            radius: 60,
+                            backgroundImage: NetworkImage("https://i0.wp.com/collegecore.com/wp-content/uploads/2018/05/facebook-no-profile-picture-icon-620x389.jpg?ssl=1"),
+                          )),
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                          onPressed: () async {
+                            final result = await FilePicker.platform.pickFiles(
+                                allowMultiple: false,
+                                type: FileType.custom,
+                                allowedExtensions: ['png','jpg','jpeg']
+                            );
+
+                            if (result == null){
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                  content: Text("No Image Selected")));
+                              return;
+                            }
+                            final filePath = result.files.single.path!;
+                            const fileName = "pfp";
+                            storage.uploadFile(filePath, fileName);
+                          },
+                          style:
+                          ElevatedButton.styleFrom(backgroundColor: Colors.brown),
+                          child: const Text("Change Profile",
+                              style: TextStyle(color: Colors.white))),
+                    ],
+                  );
+                }
+              }),
           Container(
             alignment: Alignment.center,
-            height: 500,
+            height: 420,
             //color: Colors.green,
             child: Form(
               autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -169,35 +233,6 @@ class _ProFormState extends State<ProForm> {
                     },
                   ),
                   const SizedBox(height: 7),
-                  TextFormField(
-                    controller: phoneNum,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: "Phone Number:",
-                    ),
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return "Please Enter Phone Number";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 7),
-                  TextFormField(
-                    controller: address,
-                    keyboardType: TextInputType.streetAddress,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: "Address:",
-                    ),
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return "Please Enter Address";
-                      }
-                      return null;
-                    },
-                  ),
                 ],
               ),
             ),
@@ -209,14 +244,14 @@ class _ProFormState extends State<ProForm> {
             //color: Colors.blue,
             child: ElevatedButton(
               onPressed: () async {
+                print(newDoc.id);
+                print(_firebaseAuth.currentUser!.uid);
                 if (formKey.currentState!.validate()) {
                   await profile.doc(newDoc.id).update({
                     "fullName": fullName.text,
                     "age": int.parse(age.text),
-                    "gender": gender,
+                    "gender": gender.toString(),
                     "email": email.text,
-                    "phoneNum": int.parse(phoneNum.text),
-                    "address": address.text
                   });
 
                   // await dbProvider!.insertProfile(Profile(
@@ -228,14 +263,7 @@ class _ProFormState extends State<ProForm> {
                   //     address: address.text
                   // ));
 
-                  // sender = await Profile(fullName: fullName.text,
-                  //     age: int.parse(age.text),
-                  //     gender: gender,
-                  //     email: email.text,
-                  //     phoneNum: phoneNum.text,
-                  //     address: address.text);
-
-                  Navigator.pop(context,sender);
+                  Navigator.pop(context);
                 }else{
                   return;
                 }

@@ -1,12 +1,9 @@
 import 'package:final_bmi/model/storage_service.dart';
-import 'package:final_bmi/provider/db_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:firebase_database/firebase_database.dart';
 
 class Auth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  String? userID;
   User? get currentUser => _firebaseAuth.currentUser;
 
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
@@ -19,9 +16,6 @@ class Auth {
         email: email, password: password);
   }
 
-  getUserID(){
-    return userID;
-  }
 
   Future<void> createUserWithEmailAndPassword(
       {required String email,
@@ -29,15 +23,14 @@ class Auth {
       required String fullName,
       required String gender,
       required int age}) async {
-    UserCredential userCredential = await _firebaseAuth
+      UserCredential userCredential = await _firebaseAuth
         .createUserWithEmailAndPassword(email: email, password: password);
 
     Map<String,dynamic> userInfoMap = {
       "email": email,
-      "password": password,
       "fullName": fullName,
       "gender": gender,
-      "age": age
+      "age": age,
     };
 
     if(userCredential != null){

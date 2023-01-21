@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -39,8 +40,13 @@ class Storage {
     return result;
   }
 
+  Stream<String> getPicStream(String imageName) {
+    return storage.ref('${_firebaseAuth.currentUser!.uid}/uploads/$imageName').getDownloadURL().asStream();
+  }
+
+
   Future<String> getPic (String imageName)async{
-    String downloadURL = await storage.ref('adrian/$imageName').getDownloadURL();
+    String downloadURL = await storage.ref('${_firebaseAuth.currentUser!.uid}/uploads/$imageName').getDownloadURL();
 
     return downloadURL;
   }

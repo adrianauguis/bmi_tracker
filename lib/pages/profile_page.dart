@@ -2,7 +2,6 @@
 
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:final_bmi/model/storage_service.dart';
 import 'package:final_bmi/pages/profile_form_page.dart';
 import 'package:final_bmi/pages/bmi_page.dart';
@@ -11,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import '../auth.dart';
 import '../model/profile_model.dart';
 import '../provider/db_provider.dart';
@@ -33,9 +33,8 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final CollectionReference profile =
-      FirebaseFirestore.instance.collection('profile');
-  final CollectionReference bmiHistory =
-      FirebaseFirestore.instance.collection('bmiHistory');
+      FirebaseFirestore.instance.collection('users');
+
   late DocumentSnapshot docToEdit;
   DBProvider? dbProvider;
   late Future<List<Profile>> dataList;
@@ -48,250 +47,117 @@ class _ProfilePageState extends State<ProfilePage> {
     docToEdit = documentSnapshot;
   }
 
-  Future<void> deleteData(String productId) async {
-    await bmiHistory.doc(productId).delete();
-  }
-
   final User? user = Auth().currentUser!;
 
   Future<void> signOut() async {
     FirebaseAuth.instance.signOut();
     print(Auth().currentUser?.email);
     await Auth().signOut();
-    Navigator.pop(context);
+    setState(() {
+      Navigator.pop(context);
+    });
   }
 
-  buildProfileFutureBuilder(){
-    FutureBuilder(
-        future: storage.getUserFromDB(_firebaseAuth.currentUser!.uid.toString()),
-        builder: (context, AsyncSnapshot<dynamic> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done &&
-              snapshot.hasData) {
+
+  buildProfileStreamBuilder() {
+    return StreamBuilder(
+        stream: profile.snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
+          if (streamSnapshot.hasData) {
             return ListView.builder(
                 padding: const EdgeInsets.all(10),
-                itemCount: snapshot.data!.length,
+                itemCount: streamSnapshot.data!.docs.length,
                 itemBuilder: (context, index) {
                   DocumentSnapshot documentSnapshot =
-                  snapshot.data!.docs[index];
-                  setDoc(documentSnapshot);
-                  return Column(
-                    children: [
-                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-                      ListTile(
-                        leading: const Icon(Icons.perm_identity),
-                        title: Text.rich(
-                            TextSpan(text: 'Full Name: ', children: <TextSpan>[
-                              TextSpan(
-                                text: documentSnapshot['fullName'],
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                              )
-                            ])),
-                      ),
-
-                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-
-                      ListTile(
-                        leading: const Icon(Icons.onetwothree_outlined),
-                        title: Text.rich(
-                            TextSpan(text: 'Age: ', children: <TextSpan>[
-                              TextSpan(
-                                text: documentSnapshot['age'].toString(),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                              )
-                            ])),
-                      ),
-
-                      ListTile(
-                        leading: const Icon(Icons.people_alt_outlined),
-                        title: Text.rich(
-                            TextSpan(text: 'Gender: ', children: <TextSpan>[
-                              TextSpan(
-                                text: documentSnapshot['gender'],
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                              )
-                            ])),
-                      ),
-
-                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-
-                      ListTile(
-                        leading: const Icon(Icons.email_outlined),
-                        title: Text.rich(TextSpan(
-                            text: 'Email Address: ',
-                            children: <TextSpan>[
-                              TextSpan(
-                                text: documentSnapshot['emailAdd'],
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                              )
-                            ])),
-                      ),
-
-                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-
-                      // ListTile(
-                      //   leading: const Icon(Icons.phone),
-                      //   title: Text.rich(TextSpan(
-                      //       text: 'Phone Number: ',
-                      //       children: <TextSpan>[
-                      //         TextSpan(
-                      //           text: documentSnapshot['phoneNum'].toString(),
-                      //           style: const TextStyle(
-                      //               fontWeight: FontWeight.bold,
-                      //               color: Colors.white),
-                      //         )
-                      //       ])),
-                      // ),
-
-                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-
-                      // ListTile(
-                      //   leading: const Icon(Icons.pin_drop_outlined),
-                      //   title: Text.rich(
-                      //       TextSpan(text: 'Address: ', children: <TextSpan>[
-                      //         TextSpan(
-                      //           text: documentSnapshot['address'],
-                      //           style: const TextStyle(
-                      //               fontWeight: FontWeight.bold,
-                      //               color: Colors.white),
-                      //         )
-                      //       ])),
-                      // ),
-
-                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-                    ],
-                  );
+                      streamSnapshot.data!.docs[index];
+                  if (documentSnapshot.id != _firebaseAuth.currentUser!.uid) {
+                    return Container();
+                  }
+                  {
+                    setDoc(documentSnapshot);
+                    return Column(
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.perm_identity),
+                          title: Text.rich(TextSpan(
+                              text: 'Full Name: ',
+                              children: <TextSpan>[
+                                TextSpan(
+                                  text: documentSnapshot['fullName'],
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white),
+                                )
+                              ])),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.onetwothree_outlined),
+                          title: Text.rich(
+                              TextSpan(text: 'Age: ', children: <TextSpan>[
+                            TextSpan(
+                              text: documentSnapshot['age'].toString(),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            )
+                          ])),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.people_alt_outlined),
+                          title: Text.rich(
+                              TextSpan(text: 'Gender: ', children: <TextSpan>[
+                            TextSpan(
+                              text: documentSnapshot['gender'],
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            )
+                          ])),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.email_outlined),
+                          title: Text.rich(TextSpan(
+                              text: 'Email Address: ',
+                              children: <TextSpan>[
+                                TextSpan(
+                                  text: documentSnapshot['email'],
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white),
+                                )
+                              ])),
+                        ),
+                        // ListTile(
+                        //   leading: const Icon(Icons.phone),
+                        //   title: Text.rich(TextSpan(
+                        //       text: 'Phone Number: ',
+                        //       children: <TextSpan>[
+                        //         TextSpan(
+                        //           text: documentSnapshot['phoneNum'].toString(),
+                        //           style: const TextStyle(
+                        //               fontWeight: FontWeight.bold,
+                        //               color: Colors.white),
+                        //         )
+                        //       ])),
+                        // ),
+                      ],
+                    );
+                  }
                 });
-          }
-          if (snapshot.connectionState == ConnectionState.waiting ||
-              !snapshot.hasData) {
+          } else {
             return const CircularProgressIndicator();
           }
-          return Container();
         });
   }
 
-  // buildProfileStreamBuilder() {
-  //   return StreamBuilder(
-  //       stream: profile,
-  //       builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
-  //         if (streamSnapshot.hasData) {
-  //           return ListView.builder(
-  //               padding: const EdgeInsets.all(10),
-  //               itemCount: streamSnapshot.data!.docs.length,
-  //               itemBuilder: (context, index) {
-  //                 DocumentSnapshot documentSnapshot =
-  //                     streamSnapshot.data!.docs[index];
-  //                 setDoc(documentSnapshot);
-  //                 return Column(
-  //                   children: [
-  //                     // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-  //                     ListTile(
-  //                       leading: const Icon(Icons.perm_identity),
-  //                       title: Text.rich(
-  //                           TextSpan(text: 'Full Name: ', children: <TextSpan>[
-  //                         TextSpan(
-  //                           text: documentSnapshot['fullName'],
-  //                           style: const TextStyle(
-  //                               fontWeight: FontWeight.bold,
-  //                               color: Colors.white),
-  //                         )
-  //                       ])),
-  //                     ),
-  //
-  //                     // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-  //
-  //                     ListTile(
-  //                       leading: const Icon(Icons.onetwothree_outlined),
-  //                       title: Text.rich(
-  //                           TextSpan(text: 'Age: ', children: <TextSpan>[
-  //                         TextSpan(
-  //                           text: documentSnapshot['age'].toString(),
-  //                           style: const TextStyle(
-  //                               fontWeight: FontWeight.bold,
-  //                               color: Colors.white),
-  //                         )
-  //                       ])),
-  //                     ),
-  //
-  //                     ListTile(
-  //                       leading: const Icon(Icons.people_alt_outlined),
-  //                       title: Text.rich(
-  //                           TextSpan(text: 'Gender: ', children: <TextSpan>[
-  //                         TextSpan(
-  //                           text: documentSnapshot['gender'],
-  //                           style: const TextStyle(
-  //                               fontWeight: FontWeight.bold,
-  //                               color: Colors.white),
-  //                         )
-  //                       ])),
-  //                     ),
-  //
-  //                     // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-  //
-  //                     ListTile(
-  //                       leading: const Icon(Icons.email_outlined),
-  //                       title: Text.rich(TextSpan(
-  //                           text: 'Email Address: ',
-  //                           children: <TextSpan>[
-  //                             TextSpan(
-  //                               text: documentSnapshot['emailAdd'],
-  //                               style: const TextStyle(
-  //                                   fontWeight: FontWeight.bold,
-  //                                   color: Colors.white),
-  //                             )
-  //                           ])),
-  //                     ),
-  //
-  //                     // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-  //
-  //                     ListTile(
-  //                       leading: const Icon(Icons.phone),
-  //                       title: Text.rich(TextSpan(
-  //                           text: 'Phone Number: ',
-  //                           children: <TextSpan>[
-  //                             TextSpan(
-  //                               text: documentSnapshot['phoneNum'].toString(),
-  //                               style: const TextStyle(
-  //                                   fontWeight: FontWeight.bold,
-  //                                   color: Colors.white),
-  //                             )
-  //                           ])),
-  //                     ),
-  //
-  //                     // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-  //
-  //                     ListTile(
-  //                       leading: const Icon(Icons.pin_drop_outlined),
-  //                       title: Text.rich(
-  //                           TextSpan(text: 'Address: ', children: <TextSpan>[
-  //                         TextSpan(
-  //                           text: documentSnapshot['address'],
-  //                           style: const TextStyle(
-  //                               fontWeight: FontWeight.bold,
-  //                               color: Colors.white),
-  //                         )
-  //                       ])),
-  //                     ),
-  //
-  //                     // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-  //                   ],
-  //                 );
-  //               });
-  //         } else {
-  //           return const CircularProgressIndicator();
-  //         }
-  //       });
-  // }
-
   buildBMIStreamBuilder() {
+    final CollectionReference bmiHistory =
+    FirebaseFirestore.instance.collection('users').doc(_firebaseAuth.currentUser!.uid).collection('bmiHistory');
+
+    Future<void> deleteData(String productId) async {
+      await bmiHistory.doc(productId).delete();
+    }
+
     return StreamBuilder(
         stream: bmiHistory.snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
@@ -302,15 +168,15 @@ class _ProfilePageState extends State<ProfilePage> {
                 itemBuilder: (context, index) {
                   final DocumentSnapshot documentSnapshot =
                       streamSnapshot.data!.docs[index];
+                  Timestamp t = documentSnapshot['bmiDate'];
+                  DateTime date = t.toDate();
+                  String formattedDate = DateFormat.yMMMEd().format(date);
                   return Dismissible(
                     key: UniqueKey(),
                     background: Container(color: Colors.red),
                     onDismissed: (DismissDirection direction) {
                       setState(() {
                         deleteData(documentSnapshot.id);
-                        // dbProvider!.deleteBMI(documentSnapshot['id']);
-                        // dataList = dbProvider!.getBMIList();
-                        // snapshot.data!.remove(snapshot.data![index]);
                       });
                     },
                     child: Card(
@@ -320,8 +186,8 @@ class _ProfilePageState extends State<ProfilePage> {
                               const BorderSide(color: Colors.white70, width: 1),
                           borderRadius: BorderRadius.circular(10)),
                       child: ExpansionTile(
-                        title: Text(documentSnapshot['weightClass']),
-                        subtitle: Text('Result: ${documentSnapshot['result']}'),
+                        title: Text(formattedDate),
+                        subtitle: Text('BMI Result: ${documentSnapshot['bmiResult']}'),
                         backgroundColor: const Color(0xFFF8EDE3),
                         children: [
                           Container(
@@ -332,14 +198,14 @@ class _ProfilePageState extends State<ProfilePage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("Height: ${documentSnapshot['height']}",
+                                Text("Weight Class: ${documentSnapshot['weightClass']}",style:
+                            const TextStyle(color: Colors.white)),
+                                Text("Height: ${documentSnapshot['height']} ft",
                                     style:
                                         const TextStyle(color: Colors.white)),
-                                Text("Weight: ${documentSnapshot['weight']}",
+                                Text("Weight: ${documentSnapshot['weight']} kg",
                                     style:
                                         const TextStyle(color: Colors.white)),
-                                Text("Age: ${documentSnapshot['age']}",
-                                    style: const TextStyle(color: Colors.white))
                               ],
                             ),
                           )
@@ -367,11 +233,10 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.symmetric(horizontal: 35),
         children: [
           const SizedBox(height: 36),
-          FutureBuilder(
-              future: storage.getPic('pfp.jpg'),
+          StreamBuilder(
+              stream: storage.getPicStream('pfp'),
               builder: (context, AsyncSnapshot<String> snapshot) {
-                if (snapshot.connectionState == ConnectionState.done &&
-                    snapshot.hasData) {
+                if (snapshot.hasData) {
                   return Column(
                     children: [
                       Container(
@@ -379,40 +244,25 @@ class _ProfilePageState extends State<ProfilePage> {
                           height: 120,
                           child: CircleAvatar(
                             radius: 60,
-                            backgroundImage:
-                            NetworkImage(snapshot.data!),
-                          ),),
-                      ElevatedButton(
-                          onPressed: () async {
-                            final result = await FilePicker.platform.pickFiles(
-                                allowMultiple: false,
-                                type: FileType.custom,
-                                allowedExtensions: ['png','jpg','jpeg']
-                            );
-
-                            if (result == null){
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                  content: Text("No Image Selected")));
-                              return;
-                            }
-                            final filePath = result.files.single.path!;
-                            final fileName = result.files.single.name;
-                            storage.uploadFile(filePath, fileName);
-
-                          },
-                          style:
-                          ElevatedButton.styleFrom(backgroundColor: Colors.brown),
-                          child: const Text("Change Profile",
-                              style: TextStyle(color: Colors.white))),
+                            backgroundImage: NetworkImage(snapshot.data ??
+                                "https://i0.wp.com/collegecore.com/wp-content/uploads/2018/05/facebook-no-profile-picture-icon-620x389.jpg?ssl=1"),
+                          )),
                     ],
                   );
                 }
-                if (snapshot.connectionState == ConnectionState.waiting ||
-                    !snapshot.hasData) {
-                  return const CircularProgressIndicator();
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
                 }
-                return Container();
+                return Container(
+                    alignment: Alignment.center,
+                    height: 120,
+                    child: const CircleAvatar(
+                      radius: 60,
+                      backgroundImage: NetworkImage("https://i0.wp.com/collegecore.com/wp-content/uploads/2018/05/facebook-no-profile-picture-icon-620x389.jpg?ssl=1"),
+                    ));
               }),
+
+          const SizedBox(height: 10),
           ElevatedButton(
               onPressed: () async {
                 receiver = await Navigator.push(
@@ -442,11 +292,11 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   alignment: Alignment.topLeft,
-                  height: 365,
+                  height: 315,
                   color: const Color(0xFF967E76),
                   child: isLoading
                       ? const CircularProgressIndicator()
-                      : buildProfileFutureBuilder())),
+                      : buildProfileStreamBuilder())),
           const SizedBox(height: 10),
           const SizedBox(
             height: 40,
