@@ -1,3 +1,4 @@
+import 'package:final_bmi/pages/Intro_page.dart';
 import 'package:final_bmi/pages/home_page.dart';
 import 'package:final_bmi/widget_tree.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,7 @@ class _PermissionHandlerScreenState extends State<PermissionHandlerScreen> {
             value[Permission.camera]!.isGranted) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const WidgetTree()),
+            MaterialPageRoute(builder: (context) => const Introduction()),
           );
         }
       },
