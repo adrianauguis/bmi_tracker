@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_typing_uninitialized_variables
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:final_bmi/pages/login_register_page.dart';
 import 'package:final_bmi/pages/profile_form_page.dart';
 import 'package:final_bmi/pages/bmi_page.dart';
 import 'package:final_bmi/pages/home_page.dart';
@@ -53,7 +54,9 @@ class _ProfilePageState extends State<ProfilePage> {
     FirebaseAuth.instance.signOut();
     print(Auth().currentUser?.email);
     await Auth().signOut();
-    Navigator.pop(context);
+    setState(() {
+      Navigator.pop(context);
+    });
   }
 
   buildProfileStreamBuilder() {
