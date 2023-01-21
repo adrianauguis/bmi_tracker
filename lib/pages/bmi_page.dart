@@ -95,7 +95,7 @@ class _BMIPageState extends State<BMIPage> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Pleas Enter Weight";
+                    return "Please Enter Weight";
                   }
                   return null;
                 },
