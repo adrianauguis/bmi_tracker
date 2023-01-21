@@ -1,14 +1,16 @@
 // ignore_for_file: prefer_typing_uninitialized_variables
 
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:final_bmi/pages/login_register_page.dart';
+import 'package:final_bmi/model/storage_service.dart';
 import 'package:final_bmi/pages/profile_form_page.dart';
 import 'package:final_bmi/pages/bmi_page.dart';
 import 'package:final_bmi/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-
 import '../auth.dart';
 import '../model/profile_model.dart';
 import '../provider/db_provider.dart';
@@ -29,23 +31,20 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final CollectionReference profile =
-      FirebaseFirestore.instance.collection('profile');
-  final CollectionReference bmiHistory =
-      FirebaseFirestore.instance.collection('bmiHistory');
+      FirebaseFirestore.instance.collection('users');
+
   late DocumentSnapshot docToEdit;
   DBProvider? dbProvider;
   late Future<List<Profile>> dataList;
   List<Profile> datas = [];
   var receiver;
   var isLoading = false;
+  final Storage storage = Storage();
 
   setDoc(DocumentSnapshot documentSnapshot) {
     docToEdit = documentSnapshot;
-  }
-
-  Future<void> deleteData(String productId) async {
-    await bmiHistory.doc(productId).delete();
   }
 
   final User? user = Auth().currentUser!;
@@ -59,6 +58,7 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
+
   buildProfileStreamBuilder() {
     return StreamBuilder(
         stream: profile.snapshots(),
@@ -70,101 +70,79 @@ class _ProfilePageState extends State<ProfilePage> {
                 itemBuilder: (context, index) {
                   DocumentSnapshot documentSnapshot =
                       streamSnapshot.data!.docs[index];
-                  setDoc(documentSnapshot);
-                  return Column(
-                    children: [
-                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-                      ListTile(
-                        leading: const Icon(Icons.perm_identity),
-                        title: Text.rich(
-                            TextSpan(text: 'Full Name: ', children: <TextSpan>[
-                          TextSpan(
-                            text: documentSnapshot['fullName'],
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          )
-                        ])),
-                      ),
-
-                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-
-                      ListTile(
-                        leading: const Icon(Icons.onetwothree_outlined),
-                        title: Text.rich(
-                            TextSpan(text: 'Age: ', children: <TextSpan>[
-                          TextSpan(
-                            text: documentSnapshot['age'].toString(),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          )
-                        ])),
-                      ),
-
-                      ListTile(
-                        leading: const Icon(Icons.people_alt_outlined),
-                        title: Text.rich(
-                            TextSpan(text: 'Gender: ', children: <TextSpan>[
-                          TextSpan(
-                            text: documentSnapshot['gender'],
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          )
-                        ])),
-                      ),
-
-                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-
-                      ListTile(
-                        leading: const Icon(Icons.email_outlined),
-                        title: Text.rich(TextSpan(
-                            text: 'Email Address: ',
-                            children: <TextSpan>[
-                              TextSpan(
-                                text: documentSnapshot['emailAdd'],
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                              )
-                            ])),
-                      ),
-
-                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-
-                      ListTile(
-                        leading: const Icon(Icons.phone),
-                        title: Text.rich(TextSpan(
-                            text: 'Phone Number: ',
-                            children: <TextSpan>[
-                              TextSpan(
-                                text: documentSnapshot['phoneNum'].toString(),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                              )
-                            ])),
-                      ),
-
-                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-
-                      ListTile(
-                        leading: const Icon(Icons.pin_drop_outlined),
-                        title: Text.rich(
-                            TextSpan(text: 'Address: ', children: <TextSpan>[
-                          TextSpan(
-                            text: documentSnapshot['address'],
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          )
-                        ])),
-                      ),
-
-                      // Container(decoration: const BoxDecoration(border: Border(bottom: BorderSide()))),
-                    ],
-                  );
+                  if (documentSnapshot.id != _firebaseAuth.currentUser!.uid) {
+                    return Container();
+                  }
+                  {
+                    setDoc(documentSnapshot);
+                    return Column(
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.perm_identity),
+                          title: Text.rich(TextSpan(
+                              text: 'Full Name: ',
+                              children: <TextSpan>[
+                                TextSpan(
+                                  text: documentSnapshot['fullName'],
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white),
+                                )
+                              ])),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.onetwothree_outlined),
+                          title: Text.rich(
+                              TextSpan(text: 'Age: ', children: <TextSpan>[
+                            TextSpan(
+                              text: documentSnapshot['age'].toString(),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            )
+                          ])),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.people_alt_outlined),
+                          title: Text.rich(
+                              TextSpan(text: 'Gender: ', children: <TextSpan>[
+                            TextSpan(
+                              text: documentSnapshot['gender'],
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            )
+                          ])),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.email_outlined),
+                          title: Text.rich(TextSpan(
+                              text: 'Email Address: ',
+                              children: <TextSpan>[
+                                TextSpan(
+                                  text: documentSnapshot['email'],
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white),
+                                )
+                              ])),
+                        ),
+                        // ListTile(
+                        //   leading: const Icon(Icons.phone),
+                        //   title: Text.rich(TextSpan(
+                        //       text: 'Phone Number: ',
+                        //       children: <TextSpan>[
+                        //         TextSpan(
+                        //           text: documentSnapshot['phoneNum'].toString(),
+                        //           style: const TextStyle(
+                        //               fontWeight: FontWeight.bold,
+                        //               color: Colors.white),
+                        //         )
+                        //       ])),
+                        // ),
+                      ],
+                    );
+                  }
                 });
           } else {
             return const CircularProgressIndicator();
@@ -173,6 +151,13 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   buildBMIStreamBuilder() {
+    final CollectionReference bmiHistory =
+    FirebaseFirestore.instance.collection('users').doc(_firebaseAuth.currentUser!.uid).collection('bmiHistory');
+
+    Future<void> deleteData(String productId) async {
+      await bmiHistory.doc(productId).delete();
+    }
+
     return StreamBuilder(
         stream: bmiHistory.snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
@@ -183,15 +168,15 @@ class _ProfilePageState extends State<ProfilePage> {
                 itemBuilder: (context, index) {
                   final DocumentSnapshot documentSnapshot =
                       streamSnapshot.data!.docs[index];
+                  Timestamp t = documentSnapshot['bmiDate'];
+                  DateTime date = t.toDate();
+                  String formattedDate = DateFormat.yMMMEd().format(date);
                   return Dismissible(
                     key: UniqueKey(),
                     background: Container(color: Colors.red),
                     onDismissed: (DismissDirection direction) {
                       setState(() {
                         deleteData(documentSnapshot.id);
-                        // dbProvider!.deleteBMI(documentSnapshot['id']);
-                        // dataList = dbProvider!.getBMIList();
-                        // snapshot.data!.remove(snapshot.data![index]);
                       });
                     },
                     child: Card(
@@ -201,8 +186,8 @@ class _ProfilePageState extends State<ProfilePage> {
                               const BorderSide(color: Colors.white70, width: 1),
                           borderRadius: BorderRadius.circular(10)),
                       child: ExpansionTile(
-                        title: Text(documentSnapshot['weightClass']),
-                        subtitle: Text('Result: ${documentSnapshot['result']}'),
+                        title: Text(formattedDate),
+                        subtitle: Text('BMI Result: ${documentSnapshot['bmiResult']}'),
                         backgroundColor: const Color(0xFFF8EDE3),
                         children: [
                           Container(
@@ -213,14 +198,14 @@ class _ProfilePageState extends State<ProfilePage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("Height: ${documentSnapshot['height']}",
+                                Text("Weight Class: ${documentSnapshot['weightClass']}",style:
+                            const TextStyle(color: Colors.white)),
+                                Text("Height: ${documentSnapshot['height']} ft",
                                     style:
                                         const TextStyle(color: Colors.white)),
-                                Text("Weight: ${documentSnapshot['weight']}",
+                                Text("Weight: ${documentSnapshot['weight']} kg",
                                     style:
                                         const TextStyle(color: Colors.white)),
-                                Text("Age: ${documentSnapshot['age']}",
-                                    style: const TextStyle(color: Colors.white))
                               ],
                             ),
                           )
@@ -248,39 +233,56 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.symmetric(horizontal: 35),
         children: [
           const SizedBox(height: 36),
-          Container(
-            alignment: Alignment.center,
-            height: 120,
-            child: const CircleAvatar(
-              radius: 60,
-              backgroundImage:
-                  NetworkImage('https://www.thefarmersdog.com/digest'
-                      '/wp-content/uploads/2021/12/corgi-top-1400x871.jpg'),
-            ),
-          ),
-          Container(
-              alignment: Alignment.center,
-              height: 70,
-              child: ElevatedButton(
-                  onPressed: () async {
-                    receiver = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ProForm(
-                                  docU: docToEdit,
-                                )));
-                    if (receiver != null) {
-                      setState(() {
-                        datas.add(receiver);
-                      });
-                    } else {
-                      return;
-                    }
-                  },
-                  style:
-                      ElevatedButton.styleFrom(backgroundColor: Colors.brown),
-                  child: const Text("Edit Profile",
-                      style: TextStyle(color: Colors.white)))),
+          StreamBuilder(
+              stream: storage.getPicStream('pfp'),
+              builder: (context, AsyncSnapshot<String> snapshot) {
+                if (snapshot.hasData) {
+                  return Column(
+                    children: [
+                      Container(
+                          alignment: Alignment.center,
+                          height: 120,
+                          child: CircleAvatar(
+                            radius: 60,
+                            backgroundImage: NetworkImage(snapshot.data ??
+                                "https://i0.wp.com/collegecore.com/wp-content/uploads/2018/05/facebook-no-profile-picture-icon-620x389.jpg?ssl=1"),
+                          )),
+                    ],
+                  );
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                return Container(
+                    alignment: Alignment.center,
+                    height: 120,
+                    child: const CircleAvatar(
+                      radius: 60,
+                      backgroundImage: NetworkImage("https://i0.wp.com/collegecore.com/wp-content/uploads/2018/05/facebook-no-profile-picture-icon-620x389.jpg?ssl=1"),
+                    ));
+              }),
+
+          const SizedBox(height: 10),
+          ElevatedButton(
+              onPressed: () async {
+                receiver = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ProForm(
+                              docU: docToEdit,
+                            )));
+                if (receiver != null) {
+                  setState(() {
+                    datas.add(receiver);
+                  });
+                } else {
+                  return;
+                }
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.brown),
+              child: const Text("Edit Profile",
+                  style: TextStyle(color: Colors.white))),
+          const SizedBox(width: 7),
           Card(
               elevation: 20,
               shape: RoundedRectangleBorder(
@@ -290,7 +292,7 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   alignment: Alignment.topLeft,
-                  height: 365,
+                  height: 315,
                   color: const Color(0xFF967E76),
                   child: isLoading
                       ? const CircularProgressIndicator()
@@ -298,7 +300,8 @@ class _ProfilePageState extends State<ProfilePage> {
           const SizedBox(height: 10),
           const SizedBox(
             height: 40,
-            child: Text("BMI Collection", style: TextStyle(fontSize: 40,fontWeight: FontWeight.bold)),
+            child: Text("BMI Collection",
+                style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
           ),
           Card(
               elevation: 10,
@@ -327,7 +330,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   //height: MediaQuery.of(context).size.height,
                   color: const Color(0xFF967E76),
                   child: ElevatedButton(
-                      onPressed: (){
+                      onPressed: () {
                         signOut();
                       },
                       child: const Text("Sign out"))))

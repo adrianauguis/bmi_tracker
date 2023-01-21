@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../auth.dart';
 import '../deco/header.dart';
 import '../deco/themehelper.dart';
-import 'home_page.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -18,6 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   bool checkedValue = false;
   bool checkboxValue = false;
+  bool _passwordVisible = true;
 
   String? errorMessage = '';
   bool isLogin = true;
@@ -114,6 +114,12 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
+  void initState() {
+    _passwordVisible = false;
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF00FFDE),
@@ -166,8 +172,35 @@ class _LoginPageState extends State<LoginPage> {
                         Container(
                           decoration: ThemeHelper().inputBoxDecorationShaddow(),
                           child: TextFormField(
+                            obscureText: !_passwordVisible,
                             controller: _controllerPassword,
-                            decoration: ThemeHelper().textInputDecoration('Password', 'Enter your password'),
+                            decoration: InputDecoration(
+                              labelText: 'Password',
+                              hintText: 'Enter your password',
+                              fillColor: Colors.white,
+                              filled: true,
+                              contentPadding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(100.0), borderSide: BorderSide(color: Colors.grey)),
+                              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(100.0), borderSide: BorderSide(color: Colors.grey.shade400)),
+                              errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(100.0), borderSide: BorderSide(color: Colors.red, width: 2.0)),
+                              focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(100.0), borderSide: BorderSide(color: Colors.red, width: 2.0)),
+                              // Here is key idea
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  // Based on passwordVisible state choose the icon
+                                  _passwordVisible
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color: Theme.of(context).primaryColorDark,
+                                ),
+                                onPressed: () {
+                                  // Update the state i.e. toogle the state of passwordVisible variable
+                                  setState(() {
+                                    _passwordVisible = !_passwordVisible;
+                                  });
+                                },
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 20,),

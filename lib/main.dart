@@ -1,8 +1,6 @@
 import 'package:final_bmi/pages/splash_screen.dart';
-import 'package:final_bmi/widget_tree.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'pages/home_page.dart';
 
 Future <void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
