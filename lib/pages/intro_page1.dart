@@ -42,29 +42,6 @@ class _Page1State extends State<Page1> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(18.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 60),
-                Container(
-                  decoration: ThemeHelper().buttonBoxDecoration(context),
-                  height: 40,
-                  width: 70,
-                  child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.lightBlue, // Background color
-                      ),
-                      onPressed: (){
-                        setState(() {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) => const WidgetTree()));
-                        });
-                      }, child: Text('Skip',style: TextStyle(fontSize: 20),))),
-              ],
-            ),
-          )
         ],
       ),
     );

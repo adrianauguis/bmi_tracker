@@ -42,29 +42,6 @@ class _Page4State extends State<Page4> {
               ),
             ),
             const SizedBox(height: 40,),
-            Padding(
-              padding: const EdgeInsets.all(18.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const SizedBox(height: 50),
-                  Container(
-                      decoration: ThemeHelper().buttonBoxDecoration(context),
-                      height: 50,
-                      width: 152,
-                      child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.lightBlue, // Background color
-                          ),
-                          onPressed: (){
-                            setState(() {
-                              Navigator.push(context,
-                                  MaterialPageRoute(builder: (context) => const WidgetTree()));
-                            });
-                          }, child: Text("Let's Get Started",style: TextStyle(fontSize: 20),))),
-                ],
-              ),
-            )
           ],
         ),
     );
