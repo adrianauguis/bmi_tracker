@@ -16,24 +16,18 @@ class Profile {
     this.age,
     this.gender,
     this.email,
-    this.phoneNum,
-    this.address,
   });
 
   String? fullName;
   int? age;
   String? gender;
   String? email;
-  String? phoneNum;
-  String? address;
 
   factory Profile.fromJson(Map<String, dynamic> json) => Profile(
     fullName: json["fullName"],
     age: json["age"],
     gender: json["gender"],
     email: json["email"],
-    phoneNum: json["phoneNum"],
-    address: json["address"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -41,7 +35,5 @@ class Profile {
     "age": age,
     "gender": gender,
     "email": email,
-    "phoneNum": phoneNum,
-    "address": address,
   };
 }

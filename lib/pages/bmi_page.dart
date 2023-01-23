@@ -278,7 +278,7 @@ class _BMIPageState extends State<BMIPage> {
             label: 'Home',
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.balance),
+            icon: Icon(Icons.assessment),
             label: 'BMI',
           ),
           BottomNavigationBarItem(

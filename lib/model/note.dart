@@ -7,7 +7,12 @@ class Note {
   String? calendarOutput;
 
 
-  Note(this.type, this.title, this.description, this.calendarOutput, );
+  Note({
+    this.type,
+    this.title,
+    this.description,
+    this.calendarOutput,
+  });
 }
 
 

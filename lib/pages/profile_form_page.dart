@@ -14,6 +14,7 @@ import '../model/storage_service.dart';
 
 class ProForm extends StatefulWidget {
   DocumentSnapshot docU;
+
   ProForm({Key? key, required this.docU}) : super(key: key);
 
   @override
@@ -21,7 +22,8 @@ class ProForm extends StatefulWidget {
 }
 
 class _ProFormState extends State<ProForm> {
-  final CollectionReference profile = FirebaseFirestore.instance.collection('users');
+  final CollectionReference profile =
+      FirebaseFirestore.instance.collection('users');
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final Storage storage = Storage();
   DBProvider? dbProvider;
@@ -33,18 +35,16 @@ class _ProFormState extends State<ProForm> {
   var gender, sender;
   bool update = false;
 
-
   @override
   void initState() {
     dbProvider = DBProvider();
     super.initState();
   }
 
-
   @override
   Widget build(BuildContext context) {
     DocumentSnapshot newDoc = widget.docU;
-    if (newDoc != null){
+    if (newDoc != null) {
       fullName.text = newDoc['fullName'];
       age.text = newDoc['age'].toString();
       email.text = newDoc['email'];
@@ -57,11 +57,9 @@ class _ProFormState extends State<ProForm> {
             onPressed: () {
               Navigator.pop(context);
             },
-            icon: const Icon(Icons.arrow_back)
-        ),
+            icon: const Icon(Icons.arrow_back)),
         title: const Text('Profile Information:'),
       ),
-
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         children: [
@@ -69,7 +67,7 @@ class _ProFormState extends State<ProForm> {
           StreamBuilder(
               stream: storage.getPicStream('pfp'),
               builder: (context, AsyncSnapshot<String> snapshot) {
-                if (snapshot.hasData){
+                if (snapshot.hasData) {
                   return Column(
                     children: [
                       Container(
@@ -86,20 +84,20 @@ class _ProFormState extends State<ProForm> {
                             final result = await FilePicker.platform.pickFiles(
                                 allowMultiple: false,
                                 type: FileType.custom,
-                                allowedExtensions: ['png','jpg','jpeg']
-                            );
+                                allowedExtensions: ['png', 'jpg', 'jpeg']);
 
-                            if (result == null){
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                  content: Text("No Image Selected")));
+                            if (result == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text("No Image Selected")));
                               return;
                             }
                             final filePath = result.files.single.path!;
                             const fileName = "pfp";
                             storage.uploadFile(filePath, fileName);
                           },
-                          style:
-                          ElevatedButton.styleFrom(backgroundColor: Colors.brown),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.brown),
                           child: const Text("Change Profile",
                               style: TextStyle(color: Colors.white))),
                     ],
@@ -116,7 +114,8 @@ class _ProFormState extends State<ProForm> {
                           height: 120,
                           child: const CircleAvatar(
                             radius: 60,
-                            backgroundImage: NetworkImage("https://i0.wp.com/collegecore.com/wp-content/uploads/2018/05/facebook-no-profile-picture-icon-620x389.jpg?ssl=1"),
+                            backgroundImage: NetworkImage(
+                                "https://i0.wp.com/collegecore.com/wp-content/uploads/2018/05/facebook-no-profile-picture-icon-620x389.jpg?ssl=1"),
                           )),
                       const SizedBox(height: 10),
                       ElevatedButton(
@@ -124,20 +123,20 @@ class _ProFormState extends State<ProForm> {
                             final result = await FilePicker.platform.pickFiles(
                                 allowMultiple: false,
                                 type: FileType.custom,
-                                allowedExtensions: ['png','jpg','jpeg']
-                            );
+                                allowedExtensions: ['png', 'jpg', 'jpeg']);
 
-                            if (result == null){
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                  content: Text("No Image Selected")));
+                            if (result == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text("No Image Selected")));
                               return;
                             }
                             final filePath = result.files.single.path!;
                             const fileName = "pfp";
                             storage.uploadFile(filePath, fileName);
                           },
-                          style:
-                          ElevatedButton.styleFrom(backgroundColor: Colors.brown),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.brown),
                           child: const Text("Change Profile",
                               style: TextStyle(color: Colors.white))),
                     ],
@@ -146,24 +145,21 @@ class _ProFormState extends State<ProForm> {
               }),
           Container(
             alignment: Alignment.center,
-            height: 420,
+            height: 350,
             //color: Colors.green,
             child: Form(
               autovalidateMode: AutovalidateMode.onUserInteraction,
               key: formKey,
               child: ListView(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 children: [
                   Container(
                       alignment: Alignment.center,
                       height: 50,
                       color: Colors.brown,
-                      child: const Text(
-                          "MEMBERSHIP INFORMATION",
-                          style: TextStyle(color: Colors.white)
-                      )
-                  ),
+                      child: const Text("MEMBERSHIP INFORMATION",
+                          style: TextStyle(color: Colors.white))),
                   const SizedBox(height: 7),
                   TextFormField(
                     controller: fullName,
@@ -198,9 +194,7 @@ class _ProFormState extends State<ProForm> {
                   DropdownButtonFormField(
                       value: gender,
                       decoration: const InputDecoration(
-                          labelText: "Gender:",
-                          border: OutlineInputBorder()
-                      ),
+                          labelText: "Gender:", border: OutlineInputBorder()),
                       items: const [
                         DropdownMenuItem(
                           value: "Male",
@@ -215,8 +209,7 @@ class _ProFormState extends State<ProForm> {
                         setState(() {
                           gender = value;
                         });
-                      }
-                  ),
+                      }),
                   const SizedBox(height: 7),
                   TextFormField(
                     controller: email,
@@ -237,7 +230,6 @@ class _ProFormState extends State<ProForm> {
               ),
             ),
           ),
-
           Container(
             alignment: Alignment.center,
             height: 40,
@@ -264,16 +256,13 @@ class _ProFormState extends State<ProForm> {
                   // ));
 
                   Navigator.pop(context);
-                }else{
+                } else {
                   return;
                 }
               },
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.brown),
-              child: const Text(
-                  "Save Changes",
-                  style: TextStyle(color: Colors.white)
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.brown),
+              child: const Text("Save Changes",
+                  style: TextStyle(color: Colors.white)),
             ),
           ),
         ],

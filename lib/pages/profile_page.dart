@@ -282,7 +282,9 @@ class _ProfilePageState extends State<ProfilePage> {
               style: ElevatedButton.styleFrom(backgroundColor: Colors.brown),
               child: const Text("Edit Profile",
                   style: TextStyle(color: Colors.white))),
+
           const SizedBox(width: 7),
+
           Card(
               elevation: 20,
               shape: RoundedRectangleBorder(
@@ -297,12 +299,15 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: isLoading
                       ? const CircularProgressIndicator()
                       : buildProfileStreamBuilder())),
+
           const SizedBox(height: 10),
+
           const SizedBox(
             height: 40,
             child: Text("BMI Collection",
                 style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
           ),
+
           Card(
               elevation: 10,
               shape: RoundedRectangleBorder(
