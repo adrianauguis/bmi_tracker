@@ -5,7 +5,7 @@ import 'package:final_bmi/provider/db_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../model/colors.dart';
-import '../model/note.dart';
+import '../model/planner_model.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -16,12 +16,12 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _formKey = GlobalKey<FormState>();
-  Note? note;
+  PlannerModel? note;
   DBProvider? dbProvider;
   late Future<List<BmiModel>> dataList;
   int _selectedIndex = 0;
   var isloading = false;
-  final _notes = <Note>[];
+  final _notes = <PlannerModel>[];
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   final _calendarController = TextEditingController();
@@ -124,7 +124,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildNoteCard(Note note, int index) {
+  Widget _buildNoteCard(PlannerModel note, int index) {
     return Card(
       color: noteColor[(index % noteColor.length).floor()],
       elevation: 15,
@@ -231,9 +231,7 @@ class _HomePageState extends State<HomePage> {
                         child: const Icon(Icons.calendar_today),
                         onTap: () async {
                           final picked = await _selectDate();
-                          print(picked.toString());
                           String formattedDate = DateFormat('E, d MMM yyyy, h:mm a').format(picked);
-                          print(formattedDate);
                           _calendarController.text = formattedDate;
                         },
                       ),
@@ -259,7 +257,7 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () {
                   {
                     if (_formKey.currentState!.validate()) {
-                      var note = Note(type: _selectedType.toString(),
+                      var note = PlannerModel(type: _selectedType.toString(),
                           title: _titleController.text,
                           description: _descController.text,
                           calendarOutput: _calendarController.text);
@@ -276,7 +274,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _showEditNoteDialog(Note note) {
+  void _showEditNoteDialog(PlannerModel note) {
     _titleController.text = note.title!;
     _descController.text = note.description!;
     _calendarController.text = note.calendarOutput!;
