@@ -3,9 +3,12 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_bmi/auth.dart';
+import 'package:final_bmi/model/planner_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_core/firebase_core.dart' as firebase_core;
+
+import 'bmi_model.dart';
 
 class Storage {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -28,6 +31,33 @@ class Storage {
         .collection("users")
         .doc(userId)
         .set(userInfoMap);
+  }
+
+  Future<BmiModel> createBmiData(BmiModel bmiModel) async {
+    final dbClient = FirebaseFirestore.instance.collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('bmiHistory').doc();
+
+    await dbClient.set(bmiModel.toJson());
+    return bmiModel;
+  }
+
+  Future addUserPlannerToDB(PlannerModel plannerModel) async{
+    final dbClient = FirebaseFirestore.instance.collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('plannerHistory').doc();
+
+    await dbClient.set(plannerModel.toJson());
+    return plannerModel;
+  }
+
+  Future EditUserPlannerFromDB(PlannerModel plannerModel) async{
+    final dbClient = FirebaseFirestore.instance.collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('plannerHistory').doc();
+
+    await dbClient.set(plannerModel.toJson());
+    return plannerModel;
   }
 
   Future getUserFromDB(String userId) {

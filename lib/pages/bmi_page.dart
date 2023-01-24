@@ -4,6 +4,8 @@ import 'package:final_bmi/pages/profile_page.dart';
 import 'package:final_bmi/provider/db_provider.dart';
 import 'package:flutter/material.dart';
 
+import '../model/storage_service.dart';
+
 class BMIPage extends StatefulWidget {
   const BMIPage({Key? key}) : super(key: key);
 
@@ -12,7 +14,7 @@ class BMIPage extends StatefulWidget {
 }
 
 class _BMIPageState extends State<BMIPage> {
-  DBProvider? dbProvider;
+  Storage? storage;
   DateTime dateNow = DateTime.now();
 
   var height = TextEditingController();
@@ -33,7 +35,7 @@ class _BMIPageState extends State<BMIPage> {
 
   @override
   void initState() {
-    dbProvider = DBProvider();
+    storage = Storage();
     super.initState();
   }
 
@@ -198,7 +200,7 @@ class _BMIPageState extends State<BMIPage> {
                             return;
                           }
 
-                          dbProvider!.createData(BmiModel(
+                          storage!.createBmiData(BmiModel(
                             height: double.parse(height.text),
                             weight: double.parse(weight.text),
                             bmiResult: formattedResult.toDouble(),

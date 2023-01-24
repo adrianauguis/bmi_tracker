@@ -53,12 +53,6 @@ class DBProvider {
     return profile;
   }
 
-  Future<BmiModel> createData(BmiModel bmiModel) async {
-    final dbClient = FirebaseFirestore.instance.collection('users').doc(_firebaseAuth.currentUser!.uid).collection('bmiHistory').doc();
-
-    await dbClient.set(bmiModel.toJson());
-    return bmiModel;
-  }
 
   Future<List<Profile>> getProfileList() async {
     var dbClient = await database;

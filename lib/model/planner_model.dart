@@ -19,7 +19,7 @@ class PlannerModel {
   String? type;
   String? title;
   String? description;
-  String? calendarOutput;
+  DateTime? calendarOutput;
 
   factory PlannerModel.fromJson(Map<String, dynamic> json) => PlannerModel(
     type: json["type"],
