@@ -1,4 +1,4 @@
-package com.example.final_bmi
+package com.example.Fitnemesiss
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../deco/themehelper.dart';
-import '../widget_tree.dart';
 class Page2 extends StatefulWidget {
   const Page2({Key? key}) : super(key: key);
 
@@ -13,7 +11,7 @@ class _Page2State extends State<Page2> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Color(0xFF00FFDE),
+        backgroundColor: const Color(0xFF00FFDE),
         body: ListView(
             children: [
               const SizedBox(height: 230),

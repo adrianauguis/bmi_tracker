@@ -2,18 +2,16 @@
 
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:final_bmi/model/storage_service.dart';
-import 'package:final_bmi/pages/profile_form_page.dart';
-import 'package:final_bmi/pages/bmi_page.dart';
-import 'package:final_bmi/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../auth.dart';
 import '../model/profile_model.dart';
-import '../provider/db_provider.dart';
+import '../model/storage_service.dart';
+import 'bmi_page.dart';
+import 'home_page.dart';
+import 'login_register_page.dart';
+import 'profile_form_page.dart';
 
 class ProfilePage extends StatefulWidget {
   final int? selectedIndex;
@@ -50,10 +48,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> signOut() async {
     FirebaseAuth.instance.signOut();
-    print(Auth().currentUser?.email);
     await Auth().signOut();
     setState(() {
-      Navigator.pop(context);
+      Navigator.push(context,
+      MaterialPageRoute(builder: (context) => const LoginPage()));
     });
   }
 
@@ -85,7 +83,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   text: documentSnapshot['fullName'],
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white),
+                                      color: Colors.black),
                                 )
                               ])),
                         ),
@@ -97,7 +95,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               text: documentSnapshot['age'].toString(),
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white),
+                                  color: Colors.black),
                             )
                           ])),
                         ),
@@ -109,7 +107,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               text: documentSnapshot['gender'],
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white),
+                                  color: Colors.black),
                             )
                           ])),
                         ),
@@ -122,7 +120,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   text: documentSnapshot['email'],
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white),
+                                      color: Colors.black),
                                 )
                               ])),
                         ),
@@ -261,113 +259,150 @@ class _ProfilePageState extends State<ProfilePage> {
               }),
 
           const SizedBox(height: 10),
-          ElevatedButton(
-              onPressed: () async {
-                receiver = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ProForm(
-                              docU: docToEdit,
-                            )));
-                if (receiver != null) {
-                  setState(() {
-                    datas.add(receiver);
-                  });
-                } else {
-                  return;
-                }
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.brown),
-              child: const Text("Edit Profile",
-                  style: TextStyle(color: Colors.white))),
-
-          const SizedBox(width: 7),
-
-          Card(
-              elevation: 20,
-              shape: RoundedRectangleBorder(
-                side: const BorderSide(color: Colors.white70, width: 1),
-                borderRadius: BorderRadius.circular(15),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Material(
+              elevation: 10,
+              borderRadius: BorderRadius.circular(20),
+              color: const Color(0xFF00FFDE),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                ElevatedButton(
+                        onPressed: () async {
+                          receiver = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ProForm(
+                                    docU: docToEdit,
+                                  )));
+                          if (receiver != null) {
+                            setState(() {
+                              datas.add(receiver);
+                            });
+                          } else {
+                            return;
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                        child: const Text("Edit Profile",
+                            style: TextStyle(color: Colors.black))),
+              ElevatedButton(
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                        onPressed: () {
+                          signOut();
+                            },
+                        child: const Text("Sign out", style: TextStyle(color: Colors.black))),
+                ],
               ),
-              child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  alignment: Alignment.topLeft,
-                  height: 315,
-                  color: const Color(0xFF967E76),
-                  child: isLoading
-                      ? const CircularProgressIndicator()
-                      : buildProfileStreamBuilder())),
+            ),
+          ),
+          const SizedBox(width: 7),
+         Padding(
+           padding: const EdgeInsets.all(16.0),
+           child: Container(
+               decoration: BoxDecoration(
+                 borderRadius: BorderRadius.circular(20.0),
+                   boxShadow:[
+               BoxShadow(
+                color: Colors.grey.withOpacity(0.5), //color of shadow
+                 spreadRadius: 5, //spread radius
+                 blurRadius: 7, // blur radius
+                 offset: const Offset(0, 2), // changes position of shadow
+               ),
+                  ],
+                color: Colors.white,
+               ),
+               padding: const EdgeInsets.symmetric(horizontal: 20),
+               alignment: Alignment.topLeft,
+               height: 315,
+               child: isLoading
+                   ? const CircularProgressIndicator()
+                   : buildProfileStreamBuilder()),
+         ),
 
           const SizedBox(height: 10),
 
-          const SizedBox(
-            height: 40,
-            child: Text("BMI Collection",
-                style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
+          const Center(
+            child: SizedBox(
+              height: 30,
+              child: Text("BMI Collection",
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20.0),
+                  boxShadow:[
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5), //color of shadow
+                      spreadRadius: 5, //spread radius
+                      blurRadius: 7, // blur radius
+                      offset: const Offset(0, 2), // changes position of shadow
+                    ),
+                  ],
+                  color: Colors.white,
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                alignment: Alignment.topLeft,
+                height: 315,
+                child: isLoading
+                    ? const CircularProgressIndicator()
+                    : buildBMIStreamBuilder()),
           ),
 
-          Card(
-              elevation: 10,
-              shape: RoundedRectangleBorder(
-                side: const BorderSide(color: Colors.white70, width: 1),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Container(
-                  alignment: Alignment.center,
-                  height: 300,
-                  //height: MediaQuery.of(context).size.height,
-                  color: const Color(0xFF967E76),
-                  child: isLoading
-                      ? const CircularProgressIndicator()
-                      : buildBMIStreamBuilder())),
+          // Card(
+          //     elevation: 10,
+          //     shape: RoundedRectangleBorder(
+          //       side: const BorderSide(color: Colors.white70, width: 1),
+          //       borderRadius: BorderRadius.circular(15),
+          //     ),
+          //     child: Container(
+          //         alignment: Alignment.center,
+          //         height: 300,
+          //         //height: MediaQuery.of(context).size.height,
+          //         color: const Color(0xFF967E76),
+          //         child: isLoading
+          //             ? const CircularProgressIndicator()
+          //             : buildBMIStreamBuilder())),
           const SizedBox(height: 5),
-          Card(
-              elevation: 10,
-              shape: RoundedRectangleBorder(
-                side: const BorderSide(color: Colors.white70, width: 1),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Container(
-                  alignment: Alignment.center,
-                  height: 70,
-                  //height: MediaQuery.of(context).size.height,
-                  color: const Color(0xFF967E76),
-                  child: ElevatedButton(
-                      onPressed: () {
-                        signOut();
-                      },
-                      child: const Text("Sign out"))))
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.grey,
-        currentIndex: widget.selectedIndex!,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: IconButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => HomePage()));
-                },
-                icon: const Icon(Icons.home)),
-            label: 'Home',
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Material(
+          elevation: 10,
+          borderRadius: BorderRadius.circular(20),
+          color: const Color(0xFF00FFDE),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconButton(
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => HomePage()));
+                  },
+                  icon: const Icon(Icons.home)),
+              IconButton(
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => const BMIPage()));
+                  },
+                  icon: const Icon(Icons.scale_outlined)),
+              IconButton(
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => const ProfilePage()));
+                  },
+                  icon: const Icon(Icons.person)),
+
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: IconButton(
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => const BMIPage()));
-                },
-                icon: const Icon(Icons.balance)),
-            label: 'BMI',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle),
-            label: 'Profile',
-          ),
-        ],
+        ),
       ),
     );
   }

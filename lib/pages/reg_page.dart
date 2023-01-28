@@ -46,7 +46,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF00FFDE),
+      backgroundColor: const Color(0xFF00FFDE),
       body: SingleChildScrollView(
         child: Stack(
           children: [
@@ -131,8 +131,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
                             decoration: ThemeHelper().inputBoxDecorationShaddow(),
                             height: 60,
                             child: DropdownButtonFormField(
-                              decoration: InputDecoration(border: OutlineInputBorder()),
-                              hint: Text('Gender'),
+                              decoration: const InputDecoration(border: OutlineInputBorder()),
+                              hint: const Text('Gender'),
                                 items: const [
                                   DropdownMenuItem(
                                     value: 'Male',

@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 List<Color?> noteColor = [
   Colors.pink[50],

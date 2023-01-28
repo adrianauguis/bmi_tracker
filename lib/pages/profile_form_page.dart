@@ -2,9 +2,6 @@
 
 //NOTE: USE THIS PAGE CODE FOR THE 2ND OPTION ONLY
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:final_bmi/auth.dart';
-import 'package:final_bmi/pages/profile_page.dart';
-import 'package:final_bmi/provider/db_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';

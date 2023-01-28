@@ -1,12 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:final_bmi/model/storage_service.dart';
-import 'package:final_bmi/pages/bmi_page.dart';
-import 'package:final_bmi/pages/profile_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../model/colors.dart';
 import '../model/planner_model.dart';
+import '../model/storage_service.dart';
+import 'bmi_page.dart';
+import 'profile_page.dart';
+
 
 class HomePage extends StatefulWidget {
   bool? isUpdated;
@@ -19,7 +20,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final _formKey = GlobalKey<FormState>();
   Storage? storage;
-  int _selectedIndex = 0;
   var isloading = false;
   final _notes = <PlannerModel>[];
   final _titleController = TextEditingController();
@@ -68,10 +68,10 @@ class _HomePageState extends State<HomePage> {
     }
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.grey,
-        title: const Text("Planner",
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        leading: const Icon(Icons.balance),
+        backgroundColor: const Color(0xFF00FFDE),
+        title: const Text("Fitnemesiss",
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+        leading: Image.asset('assets/splash logo.png')
       ),
       body: isLoading
           ? _showDietaryPlan()
@@ -85,43 +85,38 @@ class _HomePageState extends State<HomePage> {
           _calendarController.clear();
         },
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.grey,
-        currentIndex: _selectedIndex,
-        items: <BottomNavigationBarItem>[
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Material(
+          elevation: 10,
+          borderRadius: BorderRadius.circular(20),
+          color: const Color(0xFF00FFDE),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconButton(
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => HomePage()));
+                  },
+                  icon: const Icon(Icons.home)),
+              IconButton(
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => const BMIPage()));
+                  },
+                  icon: const Icon(Icons.scale_outlined)),
+              IconButton(
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => const ProfilePage()));
+                  },
+                  icon: const Icon(Icons.person)),
+
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: IconButton(
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => const BMIPage()));
-                },
-                icon: const Icon(Icons.assessment)),
-            label: 'Calculate BMI',
-          ),
-          BottomNavigationBarItem(
-            icon: IconButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                          const ProfilePage(
-                            selectedIndex: 2,
-                          )));
-                },
-                icon: const Icon(Icons.account_circle)),
-            label: 'Profile',
-          ),
-        ],
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
+        ),
       ),
     );
   }
@@ -158,13 +153,13 @@ class _HomePageState extends State<HomePage> {
                             style: const TextStyle(
                               fontSize: 14,
                               color: Colors.black,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
                             documentSnapshot['title'],
                             style: const TextStyle(
                                 fontSize: 18,
-                                fontWeight: FontWeight.bold,
                                 color: Colors.black),
                           ),
                           const SizedBox(

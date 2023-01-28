@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 
 Profile profileFromJson(String str) => Profile.fromJson(json.decode(str));
 

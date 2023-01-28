@@ -1,9 +1,8 @@
-import 'package:final_bmi/pages/Intro_page.dart';
-import 'package:final_bmi/pages/home_page.dart';
-import 'package:final_bmi/widget_tree.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import 'Intro_page.dart';
 
 class PermissionHandlerScreen extends StatefulWidget {
   const PermissionHandlerScreen({super.key});
@@ -86,7 +85,7 @@ class _PermissionHandlerScreenState extends State<PermissionHandlerScreen> {
         return false;
       },
       child: Scaffold(
-        backgroundColor: Color(0xFF00FFDE),
+        backgroundColor: const Color(0xFF00FFDE),
         body: Center(
           child: (ElevatedButton(
             style: ElevatedButton.styleFrom(

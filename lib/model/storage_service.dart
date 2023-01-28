@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:final_bmi/auth.dart';
-import 'package:final_bmi/model/planner_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_core/firebase_core.dart' as firebase_core;
 
+import '../auth.dart';
 import 'bmi_model.dart';
+import 'planner_model.dart';
 
 class Storage {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;

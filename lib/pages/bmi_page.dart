@@ -1,10 +1,9 @@
-import 'package:final_bmi/model/bmi_model.dart';
-import 'package:final_bmi/pages/home_page.dart';
-import 'package:final_bmi/pages/profile_page.dart';
-import 'package:final_bmi/provider/db_provider.dart';
 import 'package:flutter/material.dart';
 
+import '../model/bmi_model.dart';
 import '../model/storage_service.dart';
+import 'home_page.dart';
+import 'profile_page.dart';
 
 class BMIPage extends StatefulWidget {
   const BMIPage({Key? key}) : super(key: key);
@@ -264,39 +263,38 @@ class _BMIPageState extends State<BMIPage> {
               ),
             ],
           )),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.grey,
-        currentIndex: 1,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: IconButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => HomePage()));
-                },
-                icon: const Icon(Icons.home)),
-            label: 'Home',
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Material(
+          elevation: 10,
+          borderRadius: BorderRadius.circular(20),
+          color: const Color(0xFF00FFDE),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconButton(
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => HomePage()));
+                  },
+                  icon: const Icon(Icons.home)),
+              IconButton(
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => const BMIPage()));
+                  },
+                  icon: const Icon(Icons.scale_outlined)),
+              IconButton(
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => const ProfilePage()));
+                  },
+                  icon: const Icon(Icons.person)),
+
+            ],
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.assessment),
-            label: 'BMI',
-          ),
-          BottomNavigationBarItem(
-            icon: IconButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ProfilePage(
-                                selectedIndex: 2,
-                              )));
-                },
-                icon: const Icon(Icons.account_circle)),
-            label: 'Profile',
-          ),
-        ],
+        ),
       ),
     );
   }
