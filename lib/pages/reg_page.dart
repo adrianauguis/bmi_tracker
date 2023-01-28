@@ -226,7 +226,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                                 createUserWithEmailAndPassword();
                                 Navigator.of(context).pushAndRemoveUntil(
                                     MaterialPageRoute(
-                                        builder: (context) => const HomePage()
+                                        builder: (context) => HomePage(isUpdated: false)
                                     ),
                                         (Route<dynamic> route) => false
                                 );

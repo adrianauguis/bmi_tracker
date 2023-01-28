@@ -9,7 +9,8 @@ import '../model/colors.dart';
 import '../model/planner_model.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  bool? isUpdated;
+  HomePage({Key? key, this.isUpdated}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -26,6 +27,8 @@ class _HomePageState extends State<HomePage> {
   final _calendarController = TextEditingController();
   var _selectedType = '';
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  bool isLoading = false;
+  bool? created;
 
   Future _selectDate(DateTime date) async {
     final DateTime? picked = await showDatePicker(
@@ -58,6 +61,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    if(widget.isUpdated != null){
+      isLoading = widget.isUpdated!;
+    }else{
+      isLoading = created ?? true;
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey,
@@ -65,7 +73,9 @@ class _HomePageState extends State<HomePage> {
             style: TextStyle(fontWeight: FontWeight.bold)),
         leading: const Icon(Icons.balance),
       ),
-      body: _showDietaryPlan(),
+      body: isLoading
+          ? _showDietaryPlan()
+          : const Center(child: Text("No plans")),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
@@ -337,7 +347,9 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () {
                   {
                     if (_formKey.currentState!.validate()) {
-
+                      setState(() {
+                        isLoading = true;
+                      });
                       storage!.addUserPlannerToDB(PlannerModel(
                           title: _titleController.text,
                           type: _selectedType.toString(),

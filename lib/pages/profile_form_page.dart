@@ -26,7 +26,6 @@ class _ProFormState extends State<ProForm> {
       FirebaseFirestore.instance.collection('users');
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final Storage storage = Storage();
-  DBProvider? dbProvider;
   final formKey = GlobalKey<FormState>();
   final fullName = TextEditingController();
   final age = TextEditingController();
@@ -37,7 +36,6 @@ class _ProFormState extends State<ProForm> {
 
   @override
   void initState() {
-    dbProvider = DBProvider();
     super.initState();
   }
 

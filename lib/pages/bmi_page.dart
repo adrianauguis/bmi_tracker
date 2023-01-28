@@ -274,7 +274,7 @@ class _BMIPageState extends State<BMIPage> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const HomePage()));
+                          builder: (context) => HomePage()));
                 },
                 icon: const Icon(Icons.home)),
             label: 'Home',

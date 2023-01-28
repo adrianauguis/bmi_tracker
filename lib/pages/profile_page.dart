@@ -36,7 +36,6 @@ class _ProfilePageState extends State<ProfilePage> {
       FirebaseFirestore.instance.collection('users');
 
   late DocumentSnapshot docToEdit;
-  DBProvider? dbProvider;
   late Future<List<Profile>> dataList;
   List<Profile> datas = [];
   var receiver;
@@ -222,7 +221,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void initState() {
-    dbProvider = DBProvider();
     super.initState();
   }
 
@@ -351,7 +349,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const HomePage()));
+                          builder: (context) => HomePage()));
                 },
                 icon: const Icon(Icons.home)),
             label: 'Home',
